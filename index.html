@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiendaOnline</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+
+<body class="bg-gray-100 text-black-900">
+    <header class="flex justify-between items-center m-8">
+        <h1 class="text-5xl font-bold text-blue-900">Tienda Online</h1>
+        <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
+            <ul class="flex space-x-4">
+                <li><a class="text-gray-900 hover:text-blue-500">Inicio</a></li>
+                <li><a class="text-gray-900 hover:text-blue-500">Productos</a></li>
+                <li><a class="text-gray-900 hover:text-blue-500">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="flex justify-center items-center py-8 mb-9">
+        <section >
+            <div class="text-center">
+                <h2 class="text-6xl font-bold py-6">Catálogo de Productos</h2>
+                <p class="text-3xl text-gray-600 font-verdana">Explora nuestra seleccion de productos disponibles</p>
+            </div>
+        </section>
+    </main>
+
+    <main>
+        <div id="buscador" class="flex flex-col gap-8 items-center mb-8">
+            <input type="text" id="busqueda" placeholder="Buscar productos..." 
+            class="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 w-1/2">
+
+            <div id="categorias" class="flex flex-wrap justify-center items-center">
+                
+            </div>
+        </div>
+    </main>
+
+    <main>
+        <div id="productos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ld:grid-cols-4 gap-4">
+            
+        </div>
+    </main>
+
+    <footer class="bg-gray-900 text-white py-4 mt-8 px-6">
+        <p>&copy; 2025 Mis</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
