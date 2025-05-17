@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+<body class="bg-gray-300 min-h-screen flex flex-col items-center justify-center">
+    <header class="mb-11">
+        <h1 class="text-7xl font-bold text-blue-900">Tienda Online</h1>
+    </header>
     <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
         <h1 class="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h1>
         <form id="loginForm" class="flex flex-col gap-4">
@@ -14,8 +18,10 @@
             <input type="password" id="contrasena" placeholder="Contraseña" class="border rounded px-3 py-2" required>
             <button type="submit" class="bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors">Ingresar</button>
             <p id="mensajeError" class="text-red-500 text-center mt-2 hidden"></p>
+            <p id="mensajeCargando" class="text-gray-700 text-center mt-2 hidden"></p>
         </form>
     </div>
+
     <script>
     const loginForm = document.getElementById('loginForm');
     const mensajeError = document.getElementById('mensajeError');
@@ -24,7 +30,8 @@
         e.preventDefault();
         const usuario = document.getElementById('usuario').value;
         const contrasena = document.getElementById('contrasena').value;
-
+        mensajeCargando.textContent = 'Iniciando sesión...';
+        mensajeCargando.classList.remove('hidden');
         try {
             const respuesta = await fetch('https://fakestoreapi.com/auth/login', {
                 method: 'POST',
@@ -34,20 +41,26 @@
                     password: contrasena
                 })
             });
+            
             const data = await respuesta.json();
 
             if (respuesta.ok && data.token) {
                 localStorage.setItem('token', data.token);
                 window.location.href = 'index.html';
             } else {
+                mensajeCargando.classList.add('hidden');
                 mensajeError.textContent = 'Usuario o contraseña incorrectos';
                 mensajeError.classList.remove('hidden');
             }
         } catch (error) {
-            mensajeError.textContent = 'Error de conexión con el servidor';
+            mensajeCargando.classList.add('hidden');    
+            mensajeError.textContent = 'Usuario o contraseña incorrectos';
             mensajeError.classList.remove('hidden');
         }
     });
-</script>
+    </script>
+    <footer>
+        <p class="font-bold text-gray-600 p-4">&copy; 2025 Misael Taco</p>
+    </footer>
 </body>
 </html>
