@@ -67,6 +67,7 @@ function mostrarProductos(productos) {
                 <img src="${productos.image}" alt="${productos.title}" class="w-32 h-32 object-contain m-4">
                 <h2 class="text-lg font-bold mb-2">${productos.title}</h2>
                 <p class="text-gray-700 mb-2">$${productos.price}</p>
+                <a href="detalles.html?id=${productos.id}" class="mb-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300">Detalles</a>
                 <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">Agregar al carrito</button>
             `;
             contenedorProductos.appendChild(productoDiv);
