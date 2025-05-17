@@ -13,6 +13,13 @@
         }
     </style>
 </head>
+
+<script>
+    if (!localStorage.getItem('token')) {
+        window.location.href = 'login.html';
+    }
+</script>
+
 <body class="bg-gray-100 min-h-screen flex flex-col items-center">
     <header class="w-full py-6 bg-blue-900 text-white text-center mb-8">
         <h1 class="text-4xl font-bold text-gray-100">Contacto</h1>
@@ -21,34 +28,33 @@
         <h2 class="text-2xl font-semibold mb-4">Nuestra Ubicación</h2>
         <div id="map" class="mb-8"></div>
         <a href="index.html" class="mb-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-center">Volver</a>
-        <p class="text-center text-gray-700 p-4">Visítanos en nuestra tienda principal en Quito, Ecuador.</p>
+        <p class="text-center text-gray-700 p-4">Visítanos en Santa Teresa, Quito, Ecuador.</p>
     </main>
     <footer class="bg-gray-900 text-white py-4 mt-auto w-full text-center">
         <p>&copy; 2025 Tienda Online</p>
     </footer>
     <script>
         function initMap() {
-            const quito = { lat: -0.1806532, lng: -78.4678382 };
+            const ubicacion = { lat: -0.356389, lng: -78.404944 };
             const map = new google.maps.Map(document.getElementById("map"), {
                 zoom: 14,
-                center: quito,
+                center: ubicacion,
             });
             const marker = new google.maps.Marker({
-                position: quito,
+                position: ubicacion,
                 map: map,
-                title: "Tienda Principal",
+                title: "Tienda Online",
             });
             const infowindow = new google.maps.InfoWindow({
-                content: "<b>Tienda Principal</b>"
+                content: "<b>Tienda Online</b>"
             });
             marker.addListener("click", function() {
                 infowindow.open(map, marker);
             });
-            // Abrir el mensaje por defecto
             infowindow.open(map, marker);
         }
     </script>
 
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key="></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=CLAVE_API&callback=initMap"></script>
 </body>
 </html>
