@@ -28,6 +28,7 @@
 
     loginForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        mensajeError.classList.add('hidden');
         const usuario = document.getElementById('usuario').value;
         const contrasena = document.getElementById('contrasena').value;
         mensajeCargando.textContent = 'Iniciando sesión...';
