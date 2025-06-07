@@ -25,6 +25,7 @@ const contenedor = document.getElementById('detalle-producto');
             contenedor.innerHTML = `<p class="text-red-500 text-center">No se especificó ningún producto.</p>
             <a href="index.html" class="block mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-center">Volver</a>`;
         }*/
+       
        if (id) {
             fetch(`http://127.0.0.1:8000/api/productos/${id}`)
                 .then(res => res.json())

@@ -7,6 +7,20 @@
     <title>TiendaOnline</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJUyvuIogOqyrm629aPJSIsrUDplKzxVE",
+            authDomain: "catalogo-laravel-49a76.firebaseapp.com",
+            projectId: "catalogo-laravel-49a76",
+            storageBucket: "catalogo-laravel-49a76.appspot.com",
+            messagingSenderId: "956698369387",
+            appId: "1:956698369387:web:94450ab611b9673346c02e"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 
 <script>
@@ -61,9 +75,7 @@
     </main>
 
     <main>
-        <div id="productos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ld:grid-cols-4 gap-4">
-            
-        </div>
+        <div id="productos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ld:grid-cols-4 gap-4"></div>
     </main>
 
     <footer class="bg-gray-900 text-center text-white py-4 mt-8 px-6">
@@ -71,6 +83,19 @@
     </footer>
 
     <script src="app.js"></script>
+
+    <script>
+                // Referencia a storage
+                const storage = firebase.storage();
+                const storageRef = storage.ref('laptop.jpg');
+                storageRef.getDownloadURL().then((url) => {
+                    console.log('URL del archivo:', url);
+                    // Puedes usar la URL para mostrar la imagen, etc.
+                }).catch((error) => {
+                    console.error('Error al obtener la URL:', error);
+                });
+    </script>
+
 </body>
 
 </html>
