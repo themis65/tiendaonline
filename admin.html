@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador - TiendaOnline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-storage-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJUyvuIogOqyrm629aPJSIsrUDplKzxVE",
+            authDomain: "catalogo-laravel-49a76.firebaseapp.com",
+            projectId: "catalogo-laravel-49a76",
+            storageBucket: "catalogo-laravel-49a76.appspot.com",
+            messagingSenderId: "956698369387",
+            appId: "1:956698369387:web:94450ab611b9673346c02e"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
+</head>
+<body class="bg-gray-100 text-black-900 min-h-screen">
+    <header class="flex justify-between items-center m-8">
+        <h1 class="text-5xl font-bold text-blue-900">Panel Administrador</h1>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="index.html" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">Tienda</a></li>
+                <li><a href="#" id="cerrarSesion" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-red-500 hover:text-white transition-colors">Cerrar sesión</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
+        <h2 class="text-3xl font-bold mb-6 text-center">Gestión de Productos</h2>
+        <!-- Formulario para agregar/actualizar productos -->
+        <form id="formProducto" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <input type="hidden" id="productoId">
+            <input type="text" id="titulo" placeholder="Título del producto" class="border rounded px-3 py-2" required>
+            <input type="text" id="descripcion" placeholder="Descripción" class="border rounded px-3 py-2">
+            <input type="number" id="precio" placeholder="Precio" class="border rounded px-3 py-2" required min="0" step="0.01">
+            <input type="number" id="stock" placeholder="Stock" class="border rounded px-3 py-2" required min="0">
+            <input type="file" id="imagen" accept="image/*" class="border rounded px-3 py-2 md:col-span-2">
+            <label for="categorias" class="md:col-span-2 font-bold">Categorías (puedes seleccionar varias):</label>
+            <select id="categorias" class="border rounded px-3 py-2 md:col-span-2" multiple>
+                <!-- Opciones de categorías -->
+            </select>
+            <div class="md:col-span-2 flex gap-4">
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Guardar</button>
+                <button type="button" id="cancelarEdicion" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors hidden">Cancelar</button>
+            </div>
+        </form>
+        <!-- Tabla de productos -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border rounded">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">ID</th>
+                        <th class="py-2 px-4 border-b">Nombre</th>
+                        <th class="py-2 px-4 border-b">Descripción</th>
+                        <th class="py-2 px-4 border-b">Precio</th>
+                        <th class="py-2 px-4 border-b">Stock</th>
+                        <th class="py-2 px-4 border-b">Categoría</th>
+                        <th class="py-2 px-4 border-b">Imagen</th>
+                        <th class="py-2 px-4 border-b">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProductos">
+                    <!-- Productos renderizados aquí -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+    <script src="admin.js"></script>
+    <script>
+        // Solo permitir acceso a admin si el usuario es admin
+        const user = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!localStorage.getItem('token') || user.rol !== 'admin') {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('cerrarSesion').addEventListener('click', function(e) {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
