@@ -3,12 +3,11 @@ const contenedorCategorias = document.getElementById("categorias");
 const inputBuscar = document.getElementById("busqueda");
 let productos = [];
 let categoriaSeleccionada = "all";
+let categoriasMap = {};
 
 async function cargarProductos() {
     try {
         mostrarMensajeCargando();
-        
-        //const respuesta = await fetch("https://fakestoreapi.com/products");
 
         const respuesta = await fetch("http://127.0.0.1:8000/api/productos");
         if (!respuesta.ok) {
@@ -33,24 +32,36 @@ function filtrarProductos() {
     const textoBusqueda = inputBuscar.value.toLowerCase();
     if (textoBusqueda.trim() !== "") {
         filtrados = filtrados.filter((p) => 
-            p.title.toLowerCase().includes(textoBusqueda) || p.description.toLowerCase().includes(textoBusqueda)
+            (p.titulo && p.titulo.toLowerCase().includes(textoBusqueda)) ||
+            (p.descripcion && p.descripcion.toLowerCase().includes(textoBusqueda))
         );
     }
-
     if (categoriaSeleccionada !== "all") {
-        filtrados = filtrados.filter((p) => p.category === categoriaSeleccionada);
+        const categoriaId = categoriasMap[categoriaSeleccionada];
+        filtrados = filtrados.filter((p) => {
+            // Si el producto tiene un array de categorias relacionadas
+            if (Array.isArray(p.categorias)) {
+                return p.categorias.some(cat => String(cat.id) === String(categoriaId));
+            }
+            return false;
+        });
     }
     mostrarProductos(filtrados);
 }
 
 async function cargarCategorias() {
     try {
-        const respuesta = await fetch("https://fakestoreapi.com/products/categories");
+        const respuesta = await fetch("http://127.0.0.1:8000/api/categorias");
         if (!respuesta.ok) {
             throw new Error("Error en la respuesta de la API");
         }
         const categorias = await respuesta.json();
-        mostrarCategorias(["all",...categorias] );
+        categoriasMap = {};
+        categorias.forEach(cat => {
+            categoriasMap[cat.nombre] = cat.id;
+        });
+        const nombresCategorias = categorias.map(cat => cat.nombre);
+        mostrarCategorias(["all", ...nombresCategorias]);
     }catch (error) {
         console.error("Error al cargar las categorias: ", error);
     }
@@ -76,7 +87,7 @@ function mostrarProductos(productos) {
             `;*/
 
             productoDiv.innerHTML = `
-                <img src="${productos.image}" alt="${productos.titulo}" class="w-32 h-32 object-contain m-4">
+                <img src="${productos.imagen}" alt="${productos.titulo}" class="w-32 h-32 object-contain m-4">
                 <h2 class="text-lg font-bold mb-2">${productos.titulo}</h2>
                 <p class="text-gray-700 mb-2">$${productos.precio}</p>
                 <a href="detalles.html?id=${productos.id}" class="mb-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300">Detalles</a>
@@ -92,8 +103,8 @@ function mostrarCategorias(categorias) {
     categorias.forEach((categoria) => {
         const categoriaButton = document.createElement("button");
         categoriaButton.className = `
-        px-8 py-2 rounded-full ${categoriaSeleccionada === categoria ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"} 
-        font-bold hover:bg-blue-500 hover:text-white transition-colors duration-300`;
+            px-8 py-2 rounded-full ${categoriaSeleccionada === categoria ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-800"} 
+            font-bold hover:bg-blue-500 hover:text-white transition-colors duration-300 m-1`;
         categoriaButton.textContent = categoria === "all" ? "All" : categoria.charAt(0).toUpperCase() + categoria.slice(1);
         categoriaButton.addEventListener("click", () => {
             categoriaSeleccionada = categoria;

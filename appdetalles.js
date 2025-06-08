@@ -42,7 +42,7 @@ const contenedor = document.getElementById('detalle-producto');
 
                     contenedor.innerHTML = `
                         <div class="flex flex-col items-center">
-                            <img src="${producto.image}" alt="${producto.titulo}" class="w-48 h-48 object-contain mb-6">
+                            <img src="${producto.imagen}" alt="${producto.titulo}" class="w-48 h-48 object-contain mb-6">
                             <h1 class="text-2xl font-bold mb-2 text-center">${producto.titulo}</h1>
                             <p class="text-xl text-blue-700 font-semibold mb-2">$${producto.precio}</p>
                             <p class="text-gray-700 mb-4 text-center">${producto.descripcion}</p>
