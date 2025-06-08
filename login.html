@@ -20,6 +20,7 @@
             <p id="mensajeError" class="text-red-500 text-center mt-2 hidden"></p>
             <p id="mensajeCargando" class="text-gray-700 text-center mt-2 hidden"></p>
         </form>
+        <p class="text-center mt-4 text-blue-700 hover:underline cursor-pointer" id="enlaceRegistro">¿No tienes cuenta? Crear una cuenta</p>
     </div>
 
     <script>
@@ -63,6 +64,11 @@
             mensajeError.classList.remove('hidden');
         }
     });
+
+    // Redirigir a registro
+    document.getElementById('enlaceRegistro').onclick = function() {
+        window.location.href = 'register.html';
+    }
     </script>
     <footer>
         <p class="font-bold text-gray-600 p-4">&copy; 2025 Misael Taco</p>

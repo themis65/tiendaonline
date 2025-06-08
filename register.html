@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro - Tienda Online</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-300 min-h-screen flex flex-col items-center justify-center">
+    <header class="mb-11">
+        <h1 class="text-5xl font-bold text-blue-900">Crear Cuenta</h1>
+    </header>
+    <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
+        <form id="registerForm" class="flex flex-col gap-4">
+            <input type="text" id="nombre" placeholder="Nombre" class="border rounded px-3 py-2" required>
+            <input type="email" id="email" placeholder="Correo electrónico" class="border rounded px-3 py-2" required>
+            <input type="password" id="password" placeholder="Contraseña" class="border rounded px-3 py-2" required>
+            <input type="password" id="password_confirmation" placeholder="Confirmar contraseña" class="border rounded px-3 py-2" required>
+            <button type="submit" class="bg-green-700 text-white py-2 rounded hover:bg-green-900 transition-colors">Registrarse</button>
+            <p id="mensajeError" class="text-red-500 text-center mt-2 hidden"></p>
+            <p id="mensajeExito" class="text-green-800 text-center mt-2 hidden"></p>
+        </form>
+        <p class="text-center mt-4 text-blue-700 hover:underline cursor-pointer" id="enlaceLogin">¿Ya tienes cuenta? Inicia sesión</p>
+    </div>
+    <script>
+    document.getElementById('enlaceLogin').onclick = function() {
+        window.location.href = 'login.html';
+    };
+    const form = document.getElementById('registerForm');
+    const mensajeError = document.getElementById('mensajeError');
+    const mensajeExito = document.getElementById('mensajeExito');
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        mensajeError.classList.add('hidden');
+        mensajeExito.classList.add('hidden');
+        const nombre = document.getElementById('nombre').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const password_confirmation = document.getElementById('password_confirmation').value;
+        try {
+            const respuesta = await fetch('http://127.0.0.1:8000/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: nombre,
+                    email: email,
+                    password: password,
+                    password_confirmation: password_confirmation
+                })
+            });
+            if (respuesta.status === 201) {
+                mensajeExito.textContent = 'Usuario creado correctamente. Ahora puedes iniciar sesión.';
+                mensajeExito.classList.remove('hidden');
+                setTimeout(() => window.location.href = 'login.html', 2000);
+            } else {
+                const data = await respuesta.json();
+                let msg = 'Error al crear usuario.';
+                if (data.errors) {
+                    msg = Object.values(data.errors).flat().join(' ');
+                } else if (data.message) {
+                    msg = data.message;
+                }
+                mensajeError.textContent = msg;
+                mensajeError.classList.remove('hidden');
+            }
+        } catch (error) {
+            mensajeError.textContent = 'Error de red o del servidor.';
+            mensajeError.classList.remove('hidden');
+        }
+    });
+    </script>
+    <footer>
+        <p class="font-bold text-gray-600 p-4">&copy; 2025 Misael Taco</p>
+    </footer>
+</body>
+</html>
