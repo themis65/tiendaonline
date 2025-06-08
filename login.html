@@ -23,6 +23,10 @@
     </div>
 
     <script>
+    // Limpiar token y usuario al abrir la página de login
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+
     const loginForm = document.getElementById('loginForm');
     const mensajeError = document.getElementById('mensajeError');
 
@@ -38,7 +42,7 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    username: usuario,
+                    email: usuario,
                     password: contrasena
                 })
             });
@@ -47,11 +51,7 @@
             if (respuesta.ok && data.access_token && data.user) {
                 localStorage.setItem('token', data.access_token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-                if (data.user.rol === 'admin') {
-                    window.location.href = 'admin.html';
-                } else {
-                    window.location.href = 'index.html';
-                }
+                window.location.href = 'index.html';
             } else {
                 mensajeCargando.classList.add('hidden');
                 mensajeError.textContent = 'Usuario o contraseña incorrectos';
