@@ -42,7 +42,7 @@ Tienda Online es una aplicación web desarrollada con **HTML**, **JavaScript**, 
 
 1. **Clona el repositorio:**
    ```bash
-   git clone https://github.com/tuusuario/tu-repo.git
+   git clone https://github.com/themis65/tiendaonline.git
    cd tu-repo
    ```
 
