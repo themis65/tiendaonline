@@ -12,6 +12,17 @@ let productos = [];
 let categorias = [];
 let editando = false;
 
+// Elementos para feedback visual
+const mensajeOperacion = document.createElement('div');
+mensajeOperacion.className = 'fixed top-4 right-4 z-50 px-4 py-2 rounded shadow text-white hidden';
+document.body.appendChild(mensajeOperacion);
+function mostrarMensaje(texto, tipo = 'success') {
+    mensajeOperacion.textContent = texto;
+    mensajeOperacion.className = `fixed top-4 right-4 z-50 px-4 py-2 rounded shadow text-white ${tipo === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
+    mensajeOperacion.classList.remove('hidden');
+    setTimeout(() => mensajeOperacion.classList.add('hidden'), 2500);
+}
+
 // Cargar categorías en el select
 async function cargarCategorias() {
     const res = await fetch(`${API_URL}/categorias`);
@@ -56,9 +67,17 @@ function renderizarProductos() {
 // Subir imagen a Firebase Storage y obtener URL
 async function subirImagen(file) {
     if (!file) return '';
-    const storageRef = firebase.storage().ref(file.name);
-    await storageRef.put(file);
-    return await storageRef.getDownloadURL();
+    mostrarMensaje('Subiendo imagen...', 'success');
+    try {
+        const storageRef = firebase.storage().ref(Date.now() + '_' + file.name);
+        await storageRef.put(file);
+        const url = await storageRef.getDownloadURL();
+        mostrarMensaje('Imagen subida correctamente', 'success');
+        return url;
+    } catch (e) {
+        mostrarMensaje('Error al subir imagen', 'error');
+        throw e;
+    }
 }
 
 // Agregar o actualizar producto
@@ -72,33 +91,48 @@ form.onsubmit = async function(e) {
     const imagenInput = document.getElementById('imagen');
     const categoriasSeleccionadas = Array.from(selectCategorias.selectedOptions).map(opt => opt.value);
     let imagenUrl = '';
-    if (imagenInput.files[0]) {
-        imagenUrl = await subirImagen(imagenInput.files[0]);
-    } else if (editando) {
-        // Si estamos editando y no se selecciona nueva imagen, mantener la actual
-        const prod = productos.find(p => p.id == id);
-        imagenUrl = prod ? prod.imagen : '';
-    }
-    const data = {
-        titulo,
-        descripcion,
-        precio,
-        stock,
-        imagen: imagenUrl,
-        categorias: categoriasSeleccionadas
-    };
-    if (editando) {
-        await fetch(`${API_URL}/productos/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-    } else {
-        await fetch(`${API_URL}/productos`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
+    try {
+        if (imagenInput.files[0]) {
+            imagenUrl = await subirImagen(imagenInput.files[0]);
+        } else if (editando) {
+            // Si estamos editando y no se selecciona nueva imagen, mantener la actual
+            const prod = productos.find(p => p.id == id);
+            imagenUrl = prod ? prod.imagen : '';
+        }
+        const data = {
+            titulo,
+            descripcion,
+            precio,
+            stock,
+            imagen: imagenUrl,
+            categorias: categoriasSeleccionadas
+        };
+        let respuesta;
+        const token = localStorage.getItem('token');
+        const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        };
+        if (editando) {
+            respuesta = await fetch(`${API_URL}/productos/${id}`, {
+                method: 'PUT',
+                headers,
+                body: JSON.stringify(data)
+            });
+        } else {
+            respuesta = await fetch(`${API_URL}/productos`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(data)
+            });
+        }
+        if (respuesta.ok) {
+            mostrarMensaje(editando ? 'Producto actualizado' : 'Producto creado', 'success');
+        } else {
+            mostrarMensaje('Error al guardar producto', 'error');
+        }
+    } catch (error) {
+        mostrarMensaje('Error al guardar producto', 'error');
     }
     form.reset();
     cancelarEdicionBtn.classList.add('hidden');
@@ -126,7 +160,13 @@ window.editarProducto = function(id) {
 // Eliminar producto
 window.eliminarProducto = async function(id) {
     if (!confirm('¿Seguro que deseas eliminar este producto?')) return;
-    await fetch(`${API_URL}/productos/${id}`, { method: 'DELETE' });
+    const token = localStorage.getItem('token');
+    await fetch(`${API_URL}/productos/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
     await cargarProductos();
 };
 
