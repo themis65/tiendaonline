@@ -21,6 +21,7 @@
             <p id="mensajeCargando" class="text-gray-700 text-center mt-2 hidden"></p>
         </form>
         <p class="text-center mt-4 text-blue-700 hover:underline cursor-pointer" id="enlaceRegistro">¿No tienes cuenta? Crear una cuenta</p>
+        <p class="text-center mt-2 text-blue-700 hover:underline cursor-pointer" id="enlaceIndex">Volver a la tienda</p>
     </div>
 
     <script>
@@ -68,6 +69,10 @@
     // Redirigir a registro
     document.getElementById('enlaceRegistro').onclick = function() {
         window.location.href = 'register.html';
+    }
+
+    document.getElementById('enlaceIndex').onclick = function() {
+        window.location.href = 'index.html';
     }
     </script>
     <footer>
