@@ -52,8 +52,22 @@
         if (user.rol === 'admin') {
             document.getElementById('adminNav').style.display = '';
         }
-        document.getElementById('cerrarSesion').addEventListener('click', function(e) {
+        document.getElementById('cerrarSesion').addEventListener('click', async function(e) {
             e.preventDefault();
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await res.json();
+                console.log(data); // { message: 'Sesión cerrada correctamente' }
+            } catch (err) {
+                // Ignorar error, continuar con logout local
+            }
             localStorage.clear();
             window.location.href = 'login.html';
         });
