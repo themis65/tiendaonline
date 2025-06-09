@@ -23,15 +23,15 @@ const contenedor = document.getElementById('detalle-producto');
                             <p class="text-xl text-blue-700 font-semibold mb-2">$${producto.precio}</p>
                             <p class="text-gray-700 mb-4 text-center">${producto.descripcion}</p>
                             <p class="text-sm text-gray-500 mb-6">Categorías: <span class="capitalize">${nombresCategorias}</span></p>
-                            <a href="index.html" class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors">Volver</a>
+                            <a href="index.html" class="mb-4 px-6 py-2 bg-gray-300 text-gray-900 rounded hover:bg-blue-600 transition-colors text-center hover:text-white">Volver</a>
                         </div>
                     `;
                 })
                 .catch(() => {
                     contenedor.innerHTML = `<p class="text-red-500 text-center">No se pudo cargar el producto.</p>
-                    <a href="index.html" class="block mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-center">Volver</a>`;
+                    <a href="index.html" class="block mb-4 px-6 py-2 bg-gray-300 text-gray-900 rounded hover:bg-blue-600 transition-colors text-center hover:text-white">Volver</a>`;
                 });
         } else {
             contenedor.innerHTML = `<p class="text-red-500 text-center">No se especificó ningún producto.</p>
-            <a href="index.html" class="block mt-4 px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors text-center">Volver</a>`;
+            <a href="index.html" class="block mb-4 px-6 py-2 bg-gray-300 text-gray-900 rounded hover:bg-blue-600 transition-colors text-center hover:text-white">Volver</a>`;
         }
