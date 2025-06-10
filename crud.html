@@ -2,212 +2,254 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Panel Administrador - TiendaOnline</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Administrador - TiendaOnline</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Firebase -->
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-storage-compat.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBJUyvuIogOqyrm629aPJSIsrUDplKzxVE",
-      authDomain: "catalogo-laravel-49a76.firebaseapp.com",
-      projectId: "catalogo-laravel-49a76",
-      storageBucket: "catalogo-laravel-49a76.appspot.com",
-      messagingSenderId: "956698369387",
-      appId: "1:956698369387:web:94450ab611b9673346c02e"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.9.0/firebase-storage-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBJUyvuIogOqyrm629aPJSIsrUDplKzxVE",
+            authDomain: "catalogo-laravel-49a76.firebaseapp.com",
+            projectId: "catalogo-laravel-49a76",
+            storageBucket: "catalogo-laravel-49a76",
+            messagingSenderId: "956698369387",
+            appId: "1:956698369387:web:94450ab611b9673346c02e"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </head>
 
 <script>
-  const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user'));
-  if (!token) {
-    window.location.href = 'login.html';
-  } else if (!user || user.rol !== 'admin') {
-    window.location.href = 'index.html';
-  }
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!token) {
+        window.location.href = 'login.html';
+    } else if (!user || user.rol !== 'admin') {
+        window.location.href = 'index.html';
+    }
 </script>
 
 <body class="bg-gray-100 text-black-900 min-h-screen">
-  <header class="flex justify-between items-center m-8">
-    <h1 class="text-5xl font-bold text-blue-900">Panel Administrador</h1>
-    <nav>
-      <ul class="flex space-x-4">
-        <li><a href="index.html"
-            class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">Tienda</a>
-        </li>
-        <li><a href="#" id="cerrarSesion1"
-            class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-red-500 hover:text-white transition-colors">Cerrar
-            sesión</a></li>
-      </ul>
-    </nav>
-  </header>
+    <header class="flex justify-between items-center m-8">
+        <h1 class="text-5xl font-bold text-blue-900">Panel Administrador</h1>
+        <nav>
+            <ul class="flex space-x-4">
+                <li><a href="index.html"
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">Tienda</a>
+                </li>
+                <li><a href="#" id="cerrarSesion1"
+                        class="bg-gray-300 text-black-900 px-4 py-2 rounded hover:bg-red-500 hover:text-white transition-colors">Cerrar
+                        sesión</a></li>
+            </ul>
+        </nav>
+    </header>
 
-  <main class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
-    <h2 class="text-3xl font-bold mb-6 text-center">Gestión de Productos</h2>
+    <main class="max-w-4xl mx-auto p-6 bg-white rounded shadow">
+        <h2 class="text-3xl font-bold mb-4 text-center">Gestión de Producto</h2>
 
-    <form id="formProducto" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-      <input type="hidden" id="productoId" />
-      <input type="hidden" id="imagenActual" />
-      <input type="text" id="titulo" placeholder="Título del producto" class="border rounded px-3 py-2" required />
-      <input type="text" id="descripcion" placeholder="Descripción" class="border rounded px-3 py-2" />
-      <input type="number" id="precio" placeholder="Precio" class="border rounded px-3 py-2" required min="0"
-        step="0.01" />
-      <input type="number" id="stock" placeholder="Stock" class="border rounded px-3 py-2" required min="0" />
-      <input type="file" id="imagen" accept="image/*" class="border rounded px-3 py-2 md:col-span-2" />
-      <label for="categorias" class="md:col-span-2 font-bold">Categorías:</label>
-      <input type="text" id="nuevaCategoria" placeholder="Nueva categoría (Enter para agregar)"
-        class="border rounded px-3 py-2 md:col-span-2" />
-      <div id="categoriasContainer" class="md:col-span-2 flex flex-wrap gap-2"></div>
-      <div class="md:col-span-2 flex gap-4">
-        <button type="submit"
-          class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Guardar</button>
-        <button type="button" id="cancelarEdicion"
-          class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors hidden">Cancelar</button>
-      </div>
-    </form>
+        <form id="formProducto" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <input type="hidden" id="productoId" />
+            <input type="hidden" id="imagenActual" />
+            <input type="text" id="titulo" placeholder="Título del producto" class="border rounded px-3 py-2"
+                required />
+            <input type="text" id="descripcion" placeholder="Descripción" class="border rounded px-3 py-2" />
+            <input type="number" id="precio" placeholder="Precio" class="border rounded px-3 py-2" required min="0"
+                step="0.01" />
+            <input type="number" id="stock" placeholder="Stock" class="border rounded px-3 py-2" required min="0" />
+            <input type="file" id="imagen" accept="image/*" class="border rounded px-3 py-2 md:col-span-2" />
+            <label for="categorias" class="md:col-span-2 font-bold">Categorías:</label>
+            <input type="text" id="nuevaCategoria" placeholder="Nueva categoría (Enter para agregar)"
+                class="border rounded px-3 py-2 md:col-span-2" />
+            <div id="categoriasContainer" class="md:col-span-2 flex flex-wrap gap-2"></div>
+            <div class="md:col-span-2 flex gap-4">
+                <button type="submit"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors">Guardar</button>
+                <button type="button" id="cancelarEdicion"
+                    class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors hidden">Cancelar</button>
+            </div>
+        </form>
 
-    <div class="overflow-x-auto">
-      <table class="min-w-full bg-white border rounded">
-        <thead>
-          <tr>
-            <th class="py-2 px-4 border-b">ID</th>
-            <th class="py-2 px-4 border-b">Nombre</th>
-            <th class="py-2 px-4 border-b">Descripción</th>
-            <th class="py-2 px-4 border-b">Precio</th>
-            <th class="py-2 px-4 border-b">Stock</th>
-            <th class="py-2 px-4 border-b">Categoría</th>
-            <th class="py-2 px-4 border-b">Imagen</th>
-            <th class="py-2 px-4 border-b">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tablaProductos"></tbody>
-      </table>
-    </div>
-  </main>
+        <hr class="my-5 border-t border-gray-400">
+        <section class="mt-2">
+            <h2 class="text-3xl font-bold mb-4 text-center">Gestión de Categorías</h2>
+            <div id="listaCategorias" class="space-y-2"></div>
+        </section>
 
-  <script>
-    let productos = [];
-    let categorias = [];
-    let categoriasSeleccionadas = [];
+        <hr class="my-5 border-t border-gray-300">
+        <h2 class="text-3xl font-bold mt-4 mb-4 text-center text-gray-800">Lista de Productos</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border rounded">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">ID</th>
+                        <th class="py-2 px-4 border-b">Nombre</th>
+                        <th class="py-2 px-4 border-b">Descripción</th>
+                        <th class="py-2 px-4 border-b">Precio</th>
+                        <th class="py-2 px-4 border-b">Stock</th>
+                        <th class="py-2 px-4 border-b">Categoría</th>
+                        <th class="py-2 px-4 border-b">Imagen</th>
+                        <th class="py-2 px-4 border-b">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaProductos"></tbody>
+            </table>
+        </div>
+    </main>
 
-    const categoriasContainer = document.getElementById('categoriasContainer');
-    const nuevaCategoriaInput = document.getElementById('nuevaCategoria');
-    const form = document.getElementById('formProducto');
-    const cancelarEdicionBtn = document.getElementById('cancelarEdicion');
+    <script>
+        let productos = [];
+        let categorias = [];
+        let categoriasSeleccionadas = [];
 
-    async function cargarCategorias() {
-      const res = await fetch(`http://127.0.0.1:8000/api/categorias`);
-      categorias = await res.json();
-      renderizarCheckboxCategorias();
-    }
+        const categoriasContainer = document.getElementById('categoriasContainer');
+        const nuevaCategoriaInput = document.getElementById('nuevaCategoria');
+        const form = document.getElementById('formProducto');
+        const cancelarEdicionBtn = document.getElementById('cancelarEdicion');
 
-    function renderizarCheckboxCategorias() {
-      categoriasContainer.innerHTML = '';
-      categorias.forEach(cat => {
-        const label = document.createElement('label');
-        label.className = 'flex items-center gap-1';
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.value = cat.id;
-        checkbox.checked = categoriasSeleccionadas.includes(String(cat.id));
-        checkbox.onchange = function () {
-          if (this.checked) {
-            categoriasSeleccionadas.push(this.value);
-          } else {
-            categoriasSeleccionadas = categoriasSeleccionadas.filter(id => id !== this.value);
-          }
-        };
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(cat.nombre));
-        categoriasContainer.appendChild(label);
-      });
-    }
-
-    nuevaCategoriaInput.addEventListener('keydown', async function (e) {
-      if (e.key === 'Enter' && this.value.trim()) {
-        e.preventDefault();
-        const nombre = this.value.trim();
-        const res = await fetch(`http://127.0.0.1:8000/api/categorias`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ "nombre": nombre })
-        });
-        if (res.ok) {
-          const nuevaCat = await res.json();
-          categorias.push(nuevaCat);
-          categoriasSeleccionadas.push(String(nuevaCat.id));
-          renderizarCheckboxCategorias();
-          this.value = '';
-        } else {
-          alert('No se pudo crear la categoría');
+        async function cargarCategorias() {
+            const res = await fetch(`http://127.0.0.1:8000/api/categorias`);
+            categorias = await res.json();
+            renderizarCheckboxCategorias();
+            renderizarListaCategorias();
         }
-      }
-    });
 
-    form.onsubmit = async function (e) {
-      e.preventDefault();
+        function renderizarCheckboxCategorias() {
+            categoriasContainer.innerHTML = '';
+            categorias.forEach(cat => {
+                const label = document.createElement('label');
+                label.className = 'flex items-center gap-1';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = cat.id;
+                checkbox.checked = categoriasSeleccionadas.includes(String(cat.id));
+                checkbox.onchange = function () {
+                    if (this.checked) {
+                        categoriasSeleccionadas.push(this.value);
+                    } else {
+                        categoriasSeleccionadas = categoriasSeleccionadas.filter(id => id !== this.value);
+                    }
+                };
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(cat.nombre));
+                categoriasContainer.appendChild(label);
+            });
+        }
 
-      const id = document.getElementById('productoId').value;
-      const titulo = document.getElementById('titulo').value;
-      const descripcion = document.getElementById('descripcion').value;
-      const precio = parseFloat(document.getElementById('precio').value);
-      const stock = parseInt(document.getElementById('stock').value);
-      const imagenActual = document.getElementById('imagenActual').value;
+        function renderizarListaCategorias() {
+            const contenedor = document.getElementById('listaCategorias');
+            contenedor.innerHTML = '';
 
-      let imagenUrl = imagenActual;
-      const archivoImagen = document.getElementById('imagen').files[0];
+            categorias.forEach(cat => {
+                // Verifica si la categoría está en uso
+                const usada = productos.some(p =>
+                    p.categorias && p.categorias.some(c => c.id === cat.id)
+                );
 
-      if (archivoImagen) {
-        const storageRef = firebase.storage().ref();
-        const nombreArchivo = `productos/${Date.now()}_${archivoImagen.name}`;
-        const archivoRef = storageRef.child(nombreArchivo);
-        await archivoRef.put(archivoImagen);
-        imagenUrl = await archivoRef.getDownloadURL();
-      }
+                const div = document.createElement('div');
+                div.className = 'flex justify-between items-center bg-gray-100 p-3 rounded shadow';
 
-      const data = {
-        titulo,
-        descripcion,
-        precio,
-        stock,
-        imagen: imagenUrl,
-        categorias: categoriasSeleccionadas
-      };
+                const button = document.createElement('button');
+                button.textContent = 'Eliminar';
+                button.className = 'bg-red-700 text-gray-100 px-3 py-1 rounded hover:bg-red-600 transition-colors';
+                button.disabled = usada;
+                button.onclick = () => eliminarCategoria(cat.id);
 
-      const endpoint = id ? `http://127.0.0.1:8000/api/productos/${id}` : `http://127.0.0.1:8000/api/productos`;
-      const method = id ? 'PUT' : 'POST';
+                if (usada) {
+                    button.classList.add('opacity-50', 'cursor-not-allowed');
+                    button.title = 'No se puede eliminar una categoría en uso';
+                }
 
-      const res = await fetch(endpoint, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+                div.innerHTML = `<span>${cat.nombre}</span>`;
+                div.appendChild(button);
+                contenedor.appendChild(div);
+            });
+        }
 
-      if (res.ok) {
-        alert(`Producto ${id ? 'actualizado' : 'agregado'} exitosamente`);
-        window.location.reload();
-      } else {
-        alert(`Error al ${id ? 'actualizar' : 'agregar'} el producto`);
-      }
-    };
 
-    function agregarFilaTabla(producto) {
-      const tabla = document.getElementById('tablaProductos');
-      const fila = document.createElement('tr');
-      fila.id = `producto-${producto.id}`;
-      fila.innerHTML = `
+        nuevaCategoriaInput.addEventListener('keydown', async function (e) {
+            if (e.key === 'Enter' && this.value.trim()) {
+                e.preventDefault();
+                const nombre = this.value.trim();
+                const res = await fetch(`http://127.0.0.1:8000/api/categorias`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ "nombre": nombre })
+                });
+                if (res.ok) {
+                    const nuevaCat = await res.json();
+                    categorias.push(nuevaCat);
+                    categoriasSeleccionadas.push(String(nuevaCat.id));
+                    renderizarCheckboxCategorias();
+                    renderizarListaCategorias();
+                    this.value = '';
+                } else {
+                    alert('No se pudo crear la categoría');
+                }
+            }
+        });
+
+        form.onsubmit = async function (e) {
+            e.preventDefault();
+
+            const id = document.getElementById('productoId').value;
+            const titulo = document.getElementById('titulo').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const precio = parseFloat(document.getElementById('precio').value);
+            const stock = parseInt(document.getElementById('stock').value);
+            const imagenActual = document.getElementById('imagenActual').value;
+
+            let imagenUrl = imagenActual;
+            const archivoImagen = document.getElementById('imagen').files[0];
+
+            if (archivoImagen) {
+                const storageRef = firebase.storage().ref();
+                const nombreArchivo = `productos/${Date.now()}_${archivoImagen.name}`;
+                const archivoRef = storageRef.child(nombreArchivo);
+                await archivoRef.put(archivoImagen);
+                imagenUrl = await archivoRef.getDownloadURL();
+            }
+
+            const data = {
+                titulo,
+                descripcion,
+                precio,
+                stock,
+                imagen: imagenUrl,
+                categorias: categoriasSeleccionadas
+            };
+
+            const endpoint = id ? `http://127.0.0.1:8000/api/productos/${id}` : `http://127.0.0.1:8000/api/productos`;
+            const method = id ? 'PUT' : 'POST';
+
+            const res = await fetch(endpoint, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert(`Producto ${id ? 'actualizado' : 'agregado'} exitosamente`);
+                window.location.reload();
+            } else {
+                alert(`Error al ${id ? 'actualizar' : 'agregar'} el producto`);
+            }
+        };
+
+        function agregarFilaTabla(producto) {
+            const tabla = document.getElementById('tablaProductos');
+            const fila = document.createElement('tr');
+            fila.id = `producto-${producto.id}`;
+            fila.innerHTML = `
         <td class="py-2 px-4 border-b">${producto.id}</td>
         <td class="py-2 px-4 border-b">${producto.titulo}</td>
         <td class="py-2 px-4 border-b">${producto.descripcion}</td>
@@ -216,86 +258,107 @@
         <td class="py-2 px-4 border-b">${producto.categorias.map(c => c.nombre).join(', ')}</td>
         <td class="py-2 px-4 border-b">${producto.imagen ? `<img src="${producto.imagen}" alt="${producto.titulo}" class="w-16 h-16 object-cover rounded">` : ''}</td>
         <td class="py-2 px-4 border-b">
-          <button onclick="editarProducto(${producto.id})" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 transition-colors">Editar</button>
-          <button onclick="eliminarProducto(${producto.id})" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition-colors">Eliminar</button>
+          <button onclick="editarProducto(${producto.id})" class="bg-yellow-500 text-gray-100 px-3 py-1 m-1 rounded hover:bg-yellow-400 transition-colors">Editar</button>
+          <button onclick="eliminarProducto(${producto.id})" class="bg-red-700 text-gray-100 px-3 py-1 m-1 rounded hover:bg-red-600 transition-colors">Eliminar</button>
         </td>`;
-      tabla.appendChild(fila);
-    }
-
-    async function cargarProductos() {
-      const res = await fetch(`http://127.0.0.1:8000/api/productos`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+            tabla.appendChild(fila);
         }
-      });
-      productos = await res.json();
-      productos.forEach(p => agregarFilaTabla(p));
-    }
 
-    window.eliminarProducto = async function (id) {
-      if (!confirm("¿Estás seguro de eliminar este producto?")) return;
-
-      const res = await fetch(`http://127.0.0.1:8000/api/productos/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`
+        async function cargarProductos() {
+            const res = await fetch(`http://127.0.0.1:8000/api/productos`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            productos = await res.json();
+            productos.forEach(p => agregarFilaTabla(p));
         }
-      });
-      if (res.ok) {
-        document.getElementById(`producto-${id}`).remove();
-        alert('Producto eliminado exitosamente');
-      } else {
-        alert('Error al eliminar el producto');
-      }
-    };
 
-    window.editarProducto = function (id) {
-      const prod = productos.find(p => p.id == id);
-      if (!prod) return;
-      document.getElementById('productoId').value = prod.id;
-      document.getElementById('imagenActual').value = prod.imagen || '';
-      document.getElementById('titulo').value = prod.titulo;
-      document.getElementById('descripcion').value = prod.descripcion;
-      document.getElementById('precio').value = prod.precio;
-      document.getElementById('stock').value = prod.stock;
-      categoriasSeleccionadas = prod.categorias ? prod.categorias.map(c => String(c.id)) : [];
-      renderizarCheckboxCategorias();
-      cancelarEdicionBtn.classList.remove('hidden');
-    };
+        window.eliminarProducto = async function (id) {
+            if (!confirm("¿Estás seguro de eliminar este producto?")) return;
 
-    cancelarEdicionBtn.onclick = () => {
-      form.reset();
-      document.getElementById('productoId').value = '';
-      document.getElementById('imagenActual').value = '';
-      cancelarEdicionBtn.classList.add('hidden');
-    };
+            const res = await fetch(`http://127.0.0.1:8000/api/productos/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (res.ok) {
+                document.getElementById(`producto-${id}`).remove();
+                alert('Producto eliminado exitosamente');
+            } else {
+                alert('Error al eliminar el producto');
+            }
+        };
 
-    document.addEventListener('DOMContentLoaded', function () {
-      document.getElementById('cerrarSesion1')?.addEventListener('click', async function (e) {
-        e.preventDefault();
-        await fetch('http://127.0.0.1:8000/api/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }).catch(() => { });
-        localStorage.clear();
-        window.location.href = 'login.html';
-      });
-    });
+        async function eliminarCategoria(id) {
+            if (!confirm('¿Estás seguro de eliminar esta categoría?')) return;
 
-    window.onload = async function () {
-      await cargarCategorias();
-      await cargarProductos();
-    };
+            const res = await fetch(`http://127.0.0.1:8000/api/categorias/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
 
-    form.reset = function () {
-      HTMLFormElement.prototype.reset.call(this);
-      categoriasSeleccionadas = [];
-      renderizarCheckboxCategorias();
-    };
-  </script>
+            if (res.ok) {
+                categorias = categorias.filter(c => c.id !== id);
+                renderizarCheckboxCategorias();
+                renderizarListaCategorias();
+                alert('Categoría eliminada exitosamente');
+            } else {
+                alert('Error al eliminar la categoría');
+            }
+        }
+
+
+        window.editarProducto = function (id) {
+            const prod = productos.find(p => p.id == id);
+            if (!prod) return;
+            document.getElementById('productoId').value = prod.id;
+            document.getElementById('imagenActual').value = prod.imagen || '';
+            document.getElementById('titulo').value = prod.titulo;
+            document.getElementById('descripcion').value = prod.descripcion;
+            document.getElementById('precio').value = prod.precio;
+            document.getElementById('stock').value = prod.stock;
+            categoriasSeleccionadas = prod.categorias ? prod.categorias.map(c => String(c.id)) : [];
+            renderizarCheckboxCategorias();
+            cancelarEdicionBtn.classList.remove('hidden');
+        };
+
+        cancelarEdicionBtn.onclick = () => {
+            form.reset();
+            document.getElementById('productoId').value = '';
+            document.getElementById('imagenActual').value = '';
+            cancelarEdicionBtn.classList.add('hidden');
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('cerrarSesion1')?.addEventListener('click', async function (e) {
+                e.preventDefault();
+                await fetch('http://127.0.0.1:8000/api/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                }).catch(() => { });
+                localStorage.clear();
+                window.location.href = 'login.html';
+            });
+        });
+
+        window.onload = async function () {
+            await cargarProductos();
+            await cargarCategorias();
+        };
+
+        form.reset = function () {
+            HTMLFormElement.prototype.reset.call(this);
+            categoriasSeleccionadas = [];
+            renderizarCheckboxCategorias();
+        };
+    </script>
 </body>
 
 </html>
