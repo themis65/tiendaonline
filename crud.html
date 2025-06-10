@@ -324,6 +324,7 @@
             categoriasSeleccionadas = prod.categorias ? prod.categorias.map(c => String(c.id)) : [];
             renderizarCheckboxCategorias();
             cancelarEdicionBtn.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         cancelarEdicionBtn.onclick = () => {

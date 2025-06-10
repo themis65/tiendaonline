@@ -43,7 +43,7 @@ Tienda Online es una aplicación web desarrollada con **HTML**, **JavaScript**, 
 1. **Clona el repositorio:**
    ```bash
    git clone https://github.com/themis65/tiendaonline.git
-   cd tu-repo
+   cd tiendaonline
    ```
 
 2. **Configura Firebase:**
