@@ -14,8 +14,27 @@
         <h1 class="text-5xl font-bold text-blue-900">Tienda Online</h1>
         <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
             <ul class="flex space-x-4" id="navMenu">
-                <li>
-                    <a href ="#menu" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Inicio</a></li>
+                <li id="carritoNav" class="relative">
+                    <a href="#" id="carritoLink" class="relative bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">
+                        <span class="inline-block align-middle">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6 inline-block align-middle">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A1 1 0 007 17h10a1 1 0 00.95-.68L21 13M7 13V6a1 1 0 011-1h3m4 0h2a1 1 0 011 1v7" />
+                            </svg>
+                        </span>
+                        <span class="ml-1 align-middle">Carrito</span>
+                        <span id="carritoContador" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 hidden">0</span>
+                    </a>
+                    <!-- Menú desplegable del carrito -->
+                    <div id="carritoMenu" class="hidden absolute left-0 top-full mt-2 w-80 bg-white border border-gray-300 rounded-lg shadow-lg z-50 p-4">
+                        <h3 class="text-lg font-bold mb-2">Tu carrito</h3>
+                        <div id="carritoProductos" class="max-h-60 overflow-y-auto mb-2"></div>
+                        <div class="mb-2">
+                            <label for="direccionEnvio" class="block text-sm font-medium mb-1">Dirección de envío</label>
+                            <input id="direccionEnvio" type="text" class="w-full border border-gray-300 rounded px-2 py-1" placeholder="Ingresa tu dirección">
+                        </div>
+                        <button id="confirmarPedidoBtn" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors">Confirmar pedido</button>
+                    </div>
+                </li>
                 <li>
                     <a href="#productos" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Productos</a></li>
                 <li>
@@ -29,6 +48,7 @@
                 <li id="logoutNav" style="display:none">
                     <a href="#" id="cerrarSesion" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-red-500 transition-colors hover:text-white">Cerrar sesión</a>
                 </li>
+                
             </ul>
         </nav>
     </header>
@@ -41,9 +61,11 @@
         if (localStorage.getItem('token')) {
             document.getElementById('logoutNav').style.display = '';
             document.getElementById('loginNav').style.display = 'none';
+            document.getElementById('carritoNav').style.display = '';
         } else {
             document.getElementById('logoutNav').style.display = 'none';
             document.getElementById('loginNav').style.display = '';
+            document.getElementById('carritoNav').style.display = 'none';
         }
         const cerrarSesionBtn = document.getElementById('cerrarSesion');
         if (cerrarSesionBtn) {
@@ -66,6 +88,129 @@
                 window.location.href = 'login.html';
             });
         }
+        // Carrito: actualizar contador
+        function actualizarContadorCarrito() {
+            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            const total = carrito.reduce((acc, p) => acc + (p.cantidad || 1), 0);
+            const contador = document.getElementById('carritoContador');
+            if (contador) {
+                contador.textContent = total;
+                if (total > 0) {
+                    contador.classList.remove('hidden');
+                } else {
+                    contador.classList.add('hidden');
+                }
+            }
+        }
+        actualizarContadorCarrito();
+        window.addEventListener('storage', actualizarContadorCarrito);
+
+        // Mostrar/ocultar menú del carrito y renderizar productos
+        const carritoLink = document.getElementById('carritoLink');
+        const carritoMenu = document.getElementById('carritoMenu');
+        const carritoProductos = document.getElementById('carritoProductos');
+        const confirmarPedidoBtn = document.getElementById('confirmarPedidoBtn');
+        const direccionEnvio = document.getElementById('direccionEnvio');
+
+        function renderizarCarritoMenu() {
+            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            if (carrito.length === 0) {
+                carritoProductos.innerHTML = '<p class="text-gray-500 text-center">El carrito está vacío.</p>';
+                return;
+            }
+            carritoProductos.innerHTML = carrito.map((p, idx) => `
+                <div class="flex items-center justify-between border-b py-2">
+                    <span class="font-medium">${p.nombre || p.titulo || 'Producto'}</span>
+                    <div class="flex items-center gap-2">
+                        <button class="disminuirCantidad bg-gray-200 px-2 rounded text-lg font-bold" data-idx="${idx}">-</button>
+                        <input type="number" min="1" class="cantidadProducto w-12 text-center border rounded" value="${p.cantidad || 1}" data-idx="${idx}">
+                        <button class="aumentarCantidad bg-gray-200 px-2 rounded text-lg font-bold" data-idx="${idx}">+</button>
+                        <button class="eliminarProducto bg-red-500 text-white px-2 rounded text-lg font-bold" title="Eliminar" data-idx="${idx}">&times;</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Listeners para aumentar/disminuir cantidad y eliminar producto
+            carritoProductos.querySelectorAll('.disminuirCantidad').forEach(btn => {
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.idx);
+                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                    if (carrito[idx].cantidad > 1) {
+                        carrito[idx].cantidad--;
+                        localStorage.setItem('carrito', JSON.stringify(carrito));
+                        renderizarCarritoMenu();
+                        actualizarContadorCarrito();
+                    }
+                };
+            });
+            carritoProductos.querySelectorAll('.aumentarCantidad').forEach(btn => {
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.idx);
+                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                    carrito[idx].cantidad = (carrito[idx].cantidad || 1) + 1;
+                    localStorage.setItem('carrito', JSON.stringify(carrito));
+                    renderizarCarritoMenu();
+                    actualizarContadorCarrito();
+                };
+            });
+            carritoProductos.querySelectorAll('.cantidadProducto').forEach(input => {
+                input.onchange = function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.idx);
+                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                    let val = parseInt(this.value);
+                    if (isNaN(val) || val < 1) val = 1;
+                    carrito[idx].cantidad = val;
+                    localStorage.setItem('carrito', JSON.stringify(carrito));
+                    renderizarCarritoMenu();
+                    actualizarContadorCarrito();
+                };
+            });
+            carritoProductos.querySelectorAll('.eliminarProducto').forEach(btn => {
+                btn.onclick = function(e) {
+                    e.stopPropagation();
+                    const idx = parseInt(this.dataset.idx);
+                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+                    carrito.splice(idx, 1);
+                    localStorage.setItem('carrito', JSON.stringify(carrito));
+                    renderizarCarritoMenu();
+                    actualizarContadorCarrito();
+                };
+            });
+        }
+
+        carritoLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (carritoMenu.classList.contains('hidden')) {
+                renderizarCarritoMenu();
+                carritoMenu.classList.remove('hidden');
+            } else {
+                carritoMenu.classList.add('hidden');
+            }
+        });
+        // Cerrar menú si se hace clic fuera
+        document.addEventListener('click', function(e) {
+            if (!carritoMenu.contains(e.target) && !carritoLink.contains(e.target)) {
+                carritoMenu.classList.add('hidden');
+            }
+        });
+        // Confirmar pedido
+        confirmarPedidoBtn.addEventListener('click', function() {
+            const direccion = direccionEnvio.value.trim();
+            if (!direccion) {
+                direccionEnvio.classList.add('border-red-500');
+                direccionEnvio.placeholder = 'La dirección es obligatoria';
+                return;
+            }
+            direccionEnvio.classList.remove('border-red-500');
+            // Aquí puedes enviar el pedido al backend o mostrar un mensaje
+            carritoMenu.classList.add('hidden');
+            localStorage.removeItem('carrito');
+            actualizarContadorCarrito();
+            alert('¡Pedido confirmado!');
+        });
     </script>
     <main class="flex justify-center items-center py-8 mb-9">
         <section >

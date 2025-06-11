@@ -67,24 +67,115 @@ async function cargarCategorias() {
     }
 }
 
+// --- POPUP DE CANTIDAD ---
+function mostrarPopupCantidad(producto) {
+    // Verifica si está logueado antes de mostrar el popup de cantidad
+    const token = localStorage.getItem('token');
+    if (!token) {
+        mostrarMensajeFlotanteLogin();
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 1000);
+        return;
+    }
+
+    const popupExistente = document.getElementById('popupCantidad');
+    if (popupExistente) popupExistente.remove();
+
+    const fondo = document.createElement('div');
+    fondo.id = 'popupCantidad';
+    fondo.className = 'fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50';
+    fondo.innerHTML = `
+        <div class="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center w-80">
+            <h3 class="text-xl font-bold mb-4">¿Cuántas unidades deseas agregar?</h3>
+            <input type="number" id="inputCantidadPopup" min="1" value="1" class="border rounded px-3 py-2 w-24 text-center mb-4" />
+            <div class="flex gap-4">
+                <button id="btnAgregarPopup" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">Agregar</button>
+                <button id="btnCancelarPopup" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">Cancelar</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(fondo);
+    document.getElementById('inputCantidadPopup').focus();
+    document.getElementById('btnAgregarPopup').onclick = () => {
+        let cantidad = parseInt(document.getElementById('inputCantidadPopup').value);
+        if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
+        agregarAlCarrito(producto, cantidad);
+        fondo.remove();
+    };
+    document.getElementById('btnCancelarPopup').onclick = () => fondo.remove();
+    // Cerrar con Escape
+    fondo.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') fondo.remove();
+    });
+    // Permitir Enter para agregar
+    document.getElementById('inputCantidadPopup').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') document.getElementById('btnAgregarPopup').click();
+    });
+}
+
+function agregarAlCarrito(producto, cantidad = 1) {
+    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+    const idx = carrito.findIndex(p => p.id === producto.id);
+    if (idx !== -1) {
+        carrito[idx].cantidad += cantidad;
+    } else {
+        carrito.push({ ...producto, cantidad });
+    }
+    localStorage.setItem('carrito', JSON.stringify(carrito));
+    if (typeof window.actualizarContadorCarrito === 'function') window.actualizarContadorCarrito();
+    // Mensaje de éxito
+    mostrarPopupExito();
+}
+
+function mostrarPopupExito() {
+    // Si ya existe, elimínalo
+    const popupExistente = document.getElementById('popupExitoCarrito');
+    if (popupExistente) popupExistente.remove();
+    const popup = document.createElement('div');
+    popup.id = 'popupExitoCarrito';
+    popup.className = 'fixed top-8 right-8 bg-green-600 text-white px-6 py-3 rounded shadow-lg z-50';
+    popup.textContent = 'Producto agregado al carrito';
+    document.body.appendChild(popup);
+    setTimeout(() => popup.remove(), 1800);
+}
+
+function mostrarMensajeFlotanteLogin() {
+    const existente = document.getElementById('msgFlotanteLogin');
+    if (existente) existente.remove();
+    const div = document.createElement('div');
+    div.id = 'msgFlotanteLogin';
+    div.className = 'fixed inset-0 flex items-center justify-center z-50';
+    div.innerHTML = `
+        <div class="bg-gray-500 text-white px-8 py-5 rounded shadow-lg text-xl font-semibold">
+            Se requiere iniciar sesión
+        </div>
+    `;
+    document.body.appendChild(div);
+    setTimeout(() => div.remove(), 3000);
+}
+
 function mostrarProductos(productos) {
     contenedorProductos.innerHTML = "";
     if (productos.length === 0){
         contenedorProductos.innerHTML = 
         "<p class='text-2xl font-bold text-center text-gray-800 col-span-full m-4'>No se encontraron productos.</p>";
     }else{
-        productos.forEach((productos) => {
+        productos.forEach((producto) => {
             const productoDiv = document.createElement("div");
             productoDiv.className = 
             "bg-white rounded-lg shadow-md p-4 flex flex-col items-center hover:shadow-lg transition-shadow duration-300";
 
             productoDiv.innerHTML = `
-                <img src="${productos.imagen}" alt="${productos.titulo}" class="w-32 h-32 object-contain m-4">
-                <h2 class="text-lg font-bold mb-2">${productos.titulo}</h2>
-                <p class="text-gray-700 mb-2">$${productos.precio}</p>
-                <a href="detalles.html?id=${productos.id}" class="mb-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300">Detalles</a>
+                <img src="${producto.imagen}" alt="${producto.titulo}" class="w-32 h-32 object-contain m-4">
+                <h2 class="text-lg font-bold mb-2">${producto.titulo}</h2>
+                <p class="text-gray-700 mb-2">$${producto.precio}</p>
+                <a href="detalles.html?id=${producto.id}" class="mb-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300">Detalles</a>
                 <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">Agregar al carrito</button>
             `;
+            // Botón agregar al carrito
+            const btnCarrito = productoDiv.querySelector('button');
+            btnCarrito.onclick = () => mostrarPopupCantidad(producto);
             contenedorProductos.appendChild(productoDiv);
         });
     }
