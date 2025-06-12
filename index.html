@@ -36,9 +36,8 @@
                         <div class="mb-2">
                             <label for="direccionEnvio" class="block text-sm font-medium mb-1">Dirección de
                                 envío</label>
-                            <input id="direccionEnvio" type="text"
-                                class="w-full border border-gray-300 rounded px-2 py-1"
-                                placeholder="Ingresa tu dirección">
+                            <select id="direccionEnvio"
+                                class="w-full border border-gray-300 rounded px-2 py-1"></select>
                         </div>
                         <button id="confirmarPedidoBtn"
                             class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors">Confirmar
@@ -56,7 +55,8 @@
                 </li>
                 <li id="adminNav" style="display:none">
                     <a href="crud.html"
-                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Administrar</a>
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Administrar
+                        Productos</a>
                 </li>
                 <li id="loginNav">
                     <a href="login.html"
@@ -71,7 +71,8 @@
                         <a href="#" id="menuDirecciones"
                             class="block rounded-t-lg px-4 py-2 hover:bg-blue-100 text-gray-900">Direcciones</a>
                         <a href="#" id="menuPedidos" class="block px-4 py-2 hover:bg-blue-100 text-gray-900">Pedidos</a>
-                        <a href="#" id="cerrarSesion" class="block rounded-b-lg px-4 py-2 hover:bg-red-100 text-red-700">Cerrar
+                        <a href="#" id="cerrarSesion"
+                            class="block rounded-b-lg px-4 py-2 hover:bg-red-100 text-red-700">Cerrar
                             sesión</a>
                     </div>
                 </li>
@@ -93,6 +94,26 @@
             document.getElementById('logoutNav').style.display = 'none';
             document.getElementById('loginNav').style.display = '';
             document.getElementById('carritoNav').style.display = 'none';
+        }
+
+        // Ocultar carrito, botón agregar al carrito y enlace de direcciones si el usuario es admin
+        if (user.rol === 'admin') {
+            document.getElementById('carritoNav').style.display = 'none';
+            // Ocultar el botón agregar al carrito aunque se renderice dinámicamente
+            function ocultarBotonesAgregarCarrito() {
+                document.querySelectorAll('button, a').forEach(el => {
+                    if (el.textContent && el.textContent.trim().toLowerCase() === 'agregar al carrito') {
+                        el.style.display = 'none';
+                    }
+                });
+            }
+            document.addEventListener('DOMContentLoaded', ocultarBotonesAgregarCarrito);
+            // También observar cambios en el DOM para ocultar botones agregados dinámicamente
+            const observer = new MutationObserver(ocultarBotonesAgregarCarrito);
+            observer.observe(document.body, { childList: true, subtree: true });
+            // Ocultar el enlace de direcciones en el menú de cuenta
+            var menuDirecciones = document.getElementById('menuDirecciones');
+            if (menuDirecciones) menuDirecciones.style.display = 'none';
         }
 
         // Menú desplegable de cuenta
@@ -134,7 +155,7 @@
         }
         // Carrito: actualizar contador
         function actualizarContadorCarrito() {
-            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            const carrito = localStorage.getItem('carrito_backend') ? JSON.parse(localStorage.getItem('carrito_backend')).productos : [];
             const total = carrito.reduce((acc, p) => acc + (p.cantidad || 1), 0);
             const contador = document.getElementById('carritoContador');
             if (contador) {
@@ -156,8 +177,45 @@
         const confirmarPedidoBtn = document.getElementById('confirmarPedidoBtn');
         const direccionEnvio = document.getElementById('direccionEnvio');
 
+        // --- Cargar direcciones del usuario y poblar el select ---
+        async function cargarDireccionesEnvio() {
+            const token = localStorage.getItem('token');
+            const select = document.getElementById('direccionEnvio');
+            if (!token || !select) return;
+            select.innerHTML = '<option value="">Cargando...</option>';
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/direcciones', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) throw new Error('Error al cargar direcciones');
+                const direcciones = await res.json();
+                if (Array.isArray(direcciones) && direcciones.length > 0) {
+                    select.innerHTML = '<option value="">Selecciona una dirección</option>' +
+                        direcciones.map(d => `<option value="${d.id}">${d.direccion ? d.direccion : ''}${d.ciudad ? ', ' + d.ciudad : ''}${d.provincia ? ', ' + d.provincia : ''}${d.telefono ? ' (' + d.telefono + ')' : ''}</option>`).join('');
+                } else {
+                    select.innerHTML = '<option value="">No tienes direcciones guardadas</option>';
+                }
+            } catch (e) {
+                select.innerHTML = '<option value="">Error al cargar direcciones</option>';
+            }
+        }
+
+        function getCarritoBackendProductos() {
+            const carritoBackend = JSON.parse(localStorage.getItem('carrito_backend') || '{}');
+            if (carritoBackend && Array.isArray(carritoBackend.productos)) {
+                return carritoBackend.productos.map(item => ({
+                    ...item,
+                    id: item.pivot && item.pivot.producto_id ? item.pivot.producto_id : item.id,
+                    cantidad: item.pivot && item.pivot.cantidad ? item.pivot.cantidad : item.cantidad || 1,
+                    precio: item.pivot && item.pivot.precio_unitario ? item.pivot.precio_unitario : item.precio
+                }));
+            }
+            return [];
+        }
+
         function renderizarCarritoMenu() {
-            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            const carrito = getCarritoBackendProductos();
             if (carrito.length === 0) {
                 carritoProductos.innerHTML = '<p class="text-gray-500 text-center">El carrito está vacío.</p>';
                 return;
@@ -167,7 +225,7 @@
                     <span class="font-medium">${p.nombre || p.titulo || 'Producto'}</span>
                     <div class="flex items-center gap-2">
                         <button class="disminuirCantidad bg-gray-200 px-2 rounded text-lg font-bold" data-idx="${idx}">-</button>
-                        <input type="number" min="1" class="cantidadProducto w-12 text-center border rounded" value="${p.cantidad || 1}" data-idx="${idx}">
+                        <span class="cantidadProducto w-12 text-center border rounded bg-gray-100 select-none" data-idx="${idx}">${p.cantidad || 1}</span>
                         <button class="aumentarCantidad bg-gray-200 px-2 rounded text-lg font-bold" data-idx="${idx}">+</button>
                         <button class="eliminarProducto bg-red-500 text-white px-2 rounded text-lg font-bold" title="Eliminar" data-idx="${idx}">&times;</button>
                     </div>
@@ -176,53 +234,99 @@
 
             // Listeners para aumentar/disminuir cantidad y eliminar producto
             carritoProductos.querySelectorAll('.disminuirCantidad').forEach(btn => {
-                btn.onclick = function (e) {
+                btn.onclick = async function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
-                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-                    if (carrito[idx].cantidad > 1) {
-                        carrito[idx].cantidad--;
-                        localStorage.setItem('carrito', JSON.stringify(carrito));
-                        renderizarCarritoMenu();
-                        actualizarContadorCarrito();
+                    const carrito = getCarritoBackendProductos();
+                    const producto = carrito[idx];
+                    const token = localStorage.getItem('token');
+                    const carrito_id = localStorage.getItem('carrito_id');
+                    if (!producto || !token || !carrito_id) return;
+                    try {
+                        const res = await fetch(`http://127.0.0.1:8000/api/carrito/${producto.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                carrito_id: carrito_id,
+                                cantidad: 1,
+                                opcion: 'restar'
+                            })
+                        });
+                        if (res.ok) {
+                            await sincronizarCarritoDesdeBackend();
+                        } else {
+                            const data = await res.json();
+                            alert(data.message || 'No se pudo actualizar la cantidad');
+                        }
+                    } catch (err) {
+                        alert('Error al actualizar la cantidad');
                     }
                 };
             });
             carritoProductos.querySelectorAll('.aumentarCantidad').forEach(btn => {
-                btn.onclick = function (e) {
+                btn.onclick = async function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
-                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-                    carrito[idx].cantidad = (carrito[idx].cantidad || 1) + 1;
-                    localStorage.setItem('carrito', JSON.stringify(carrito));
-                    renderizarCarritoMenu();
-                    actualizarContadorCarrito();
-                };
-            });
-            carritoProductos.querySelectorAll('.cantidadProducto').forEach(input => {
-                input.onchange = function (e) {
-                    e.stopPropagation();
-                    const idx = parseInt(this.dataset.idx);
-                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-                    let val = parseInt(this.value);
-                    if (isNaN(val) || val < 1) val = 1;
-                    carrito[idx].cantidad = val;
-                    localStorage.setItem('carrito', JSON.stringify(carrito));
-                    renderizarCarritoMenu();
-                    actualizarContadorCarrito();
+                    const carrito = getCarritoBackendProductos();
+                    const producto = carrito[idx];
+                    const token = localStorage.getItem('token');
+                    const carrito_id = localStorage.getItem('carrito_id');
+                    if (!producto || !token || !carrito_id) return;
+                    try {
+                        const res = await fetch(`http://127.0.0.1:8000/api/carrito/${producto.id}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${token}`
+                            },
+                            body: JSON.stringify({
+                                carrito_id: carrito_id,
+                                cantidad: 1,
+                                opcion: 'sumar'
+                            })
+                        });
+                        if (res.ok) {
+                            await sincronizarCarritoDesdeBackend();
+                        } else {
+                            const data = await res.json();
+                            alert(data.message || 'No se pudo actualizar la cantidad');
+                        }
+                    } catch (err) {
+                        alert('Error al actualizar la cantidad');
+                    }
                 };
             });
             carritoProductos.querySelectorAll('.eliminarProducto').forEach(btn => {
-                btn.onclick = function (e) {
+                btn.onclick = async function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
-                    let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-                    carrito.splice(idx, 1);
-                    localStorage.setItem('carrito', JSON.stringify(carrito));
-                    renderizarCarritoMenu();
-                    actualizarContadorCarrito();
+                    const carrito = getCarritoBackendProductos();
+                    const producto = carrito[idx];
+                    const token = localStorage.getItem('token');
+                    const carrito_id = localStorage.getItem('carrito_id');
+                    if (!producto || !token || !carrito_id) return;
+                    try {
+                        const res = await fetch(`http://127.0.0.1:8000/api/carrito/${producto.id}?carrito_id=${carrito_id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        });
+                        if (res.ok) {
+                            await sincronizarCarritoDesdeBackend();
+                        } else {
+                            const data = await res.json();
+                            alert(data.message || 'No se pudo eliminar el producto');
+                        }
+                    } catch (err) {
+                        alert('Error al eliminar el producto');
+                    }
                 };
             });
+            cargarDireccionesEnvio();
         }
 
         carritoLink.addEventListener('click', function (e) {
@@ -241,19 +345,52 @@
             }
         });
         // Confirmar pedido
-        confirmarPedidoBtn.addEventListener('click', function () {
-            const direccion = direccionEnvio.value.trim();
-            if (!direccion) {
+        confirmarPedidoBtn.addEventListener('click', async function () {
+            const direccion = direccionEnvio.value;
+            if (!direccion || direccion === '' || direccion === 'No tienes direcciones guardadas' || direccion === 'Error al cargar direcciones') {
                 direccionEnvio.classList.add('border-red-500');
-                direccionEnvio.placeholder = 'La dirección es obligatoria';
+                direccionEnvio.focus();
                 return;
             }
             direccionEnvio.classList.remove('border-red-500');
-            // Aquí puedes enviar el pedido al backend o mostrar un mensaje
-            carritoMenu.classList.add('hidden');
-            localStorage.removeItem('carrito');
-            actualizarContadorCarrito();
-            alert('¡Pedido confirmado!');
+            // Preparar datos del pedido
+            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
+            if (carrito.length === 0) {
+                alert('El carrito está vacío.');
+                return;
+            }
+            const productos = carrito.map(p => ({
+                producto_id: p.id,
+                cantidad: p.cantidad,
+                precio_unitario: p.precio
+            }));
+            const total = carrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/pedidos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        direccion_id: parseInt(direccion),
+                        total: total,
+                        productos: productos
+                    })
+                });
+                if (res.ok) {
+                    carritoMenu.classList.add('hidden');
+                    localStorage.removeItem('carrito');
+                    actualizarContadorCarrito();
+                    alert('¡Pedido confirmado!');
+                } else {
+                    const data = await res.json();
+                    alert(data.message || 'No se pudo confirmar el pedido');
+                }
+            } catch (err) {
+                alert('Error al enviar el pedido');
+            }
         });
         document.getElementById('menuDirecciones')?.addEventListener('click', function (e) {
             e.preventDefault();
@@ -263,6 +400,38 @@
             e.preventDefault();
             window.location.href = 'pedidos.html';
         });
+        // Sincronizar carrito local con backend al iniciar sesión y mostrarlo en el front
+        async function sincronizarCarritoDesdeBackend() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/carrito', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'content-type': 'application/json'
+                    }
+                });
+                if (!res.ok) {
+                    console.error('Error al obtener el carrito del backend:', res.status, res.statusText);
+                    return;
+                }
+                const carritoBackend = await res.json();
+                if (carritoBackend && carritoBackend.id) {
+                    localStorage.setItem('carrito_backend', JSON.stringify(carritoBackend));
+                    localStorage.setItem('carrito_id', carritoBackend.id);
+                }
+                if (typeof window.actualizarContadorCarrito === 'function') window.actualizarContadorCarrito();
+                if (typeof window.renderizarCarritoMenu === 'function') window.renderizarCarritoMenu();
+            } catch (err) {
+                console.error('No se pudo sincronizar el carrito con el backend:', err);
+            }
+        }
+        // Llamar a la función al cargar la página si hay token
+        if (localStorage.getItem('token')) {
+            sincronizarCarritoDesdeBackend();
+        }
+
     </script>
     <main class="flex justify-center items-center py-8 mb-9">
         <section>
