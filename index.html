@@ -15,40 +15,67 @@
         <nav id="menu" class="hidden md:flex md:items-center md:space-x-4">
             <ul class="flex space-x-4" id="navMenu">
                 <li id="carritoNav" class="relative">
-                    <a href="#" id="carritoLink" class="relative bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">
+                    <a href="#" id="carritoLink"
+                        class="relative bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 hover:text-white transition-colors">
                         <span class="inline-block align-middle">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-6 h-6 inline-block align-middle">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A1 1 0 007 17h10a1 1 0 00.95-.68L21 13M7 13V6a1 1 0 011-1h3m4 0h2a1 1 0 011 1v7" />
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" class="w-6 h-6 inline-block align-middle">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.35 2.7A1 1 0 007 17h10a1 1 0 00.95-.68L21 13M7 13V6a1 1 0 011-1h3m4 0h2a1 1 0 011 1v7" />
                             </svg>
                         </span>
                         <span class="ml-1 align-middle">Carrito</span>
-                        <span id="carritoContador" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 hidden">0</span>
+                        <span id="carritoContador"
+                            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5 hidden">0</span>
                     </a>
                     <!-- Menú desplegable del carrito -->
-                    <div id="carritoMenu" class="hidden absolute left-0 top-full mt-2 w-80 bg-white border border-gray-300 rounded-lg shadow-lg z-50 p-4">
+                    <div id="carritoMenu"
+                        class="hidden absolute left-0 top-full mt-2 w-80 bg-white border border-gray-300 rounded-lg shadow-lg z-50 p-4">
                         <h3 class="text-lg font-bold mb-2">Tu carrito</h3>
                         <div id="carritoProductos" class="max-h-60 overflow-y-auto mb-2"></div>
                         <div class="mb-2">
-                            <label for="direccionEnvio" class="block text-sm font-medium mb-1">Dirección de envío</label>
-                            <input id="direccionEnvio" type="text" class="w-full border border-gray-300 rounded px-2 py-1" placeholder="Ingresa tu dirección">
+                            <label for="direccionEnvio" class="block text-sm font-medium mb-1">Dirección de
+                                envío</label>
+                            <input id="direccionEnvio" type="text"
+                                class="w-full border border-gray-300 rounded px-2 py-1"
+                                placeholder="Ingresa tu dirección">
                         </div>
-                        <button id="confirmarPedidoBtn" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors">Confirmar pedido</button>
+                        <button id="confirmarPedidoBtn"
+                            class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors">Confirmar
+                            pedido</button>
                     </div>
                 </li>
+
                 <li>
-                    <a href="#productos" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Productos</a></li>
+                    <a href="#productos"
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Productos</a>
+                </li>
                 <li>
-                    <a href="contacto.html" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Contacto</a></li>
+                    <a href="contacto.html"
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Contacto</a>
+                </li>
                 <li id="adminNav" style="display:none">
-                    <a href="crud.html" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Administrar</a>
+                    <a href="crud.html"
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Administrar</a>
                 </li>
                 <li id="loginNav">
-                    <a href="login.html" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Iniciar sesión</a>
+                    <a href="login.html"
+                        class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Iniciar
+                        sesión</a>
                 </li>
-                <li id="logoutNav" style="display:none">
-                    <a href="#" id="cerrarSesion" class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-red-500 transition-colors hover:text-white">Cerrar sesión</a>
+                <li id="logoutNav" style="display:none" class="relative">
+                    <a href="#" id="cuentaBtn"
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Cuenta</a>
+                    <div id="cuentaMenu"
+                        class="hidden absolute right-0 mt-2 w-44 bg-white border border-gray-300 rounded-lg shadow-lg z-50">
+                        <a href="#" id="menuDirecciones"
+                            class="block rounded-t-lg px-4 py-2 hover:bg-blue-100 text-gray-900">Direcciones</a>
+                        <a href="#" id="menuPedidos" class="block px-4 py-2 hover:bg-blue-100 text-gray-900">Pedidos</a>
+                        <a href="#" id="cerrarSesion" class="block rounded-b-lg px-4 py-2 hover:bg-red-100 text-red-700">Cerrar
+                            sesión</a>
+                    </div>
                 </li>
-                
+
             </ul>
         </nav>
     </header>
@@ -67,9 +94,26 @@
             document.getElementById('loginNav').style.display = '';
             document.getElementById('carritoNav').style.display = 'none';
         }
+
+        // Menú desplegable de cuenta
+        const cuentaBtn = document.getElementById('cuentaBtn');
+        const cuentaMenu = document.getElementById('cuentaMenu');
+        if (cuentaBtn && cuentaMenu) {
+            cuentaBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                cuentaMenu.classList.toggle('hidden');
+            });
+            // Cerrar menú si se hace clic fuera
+            document.addEventListener('click', function (e) {
+                if (!cuentaMenu.contains(e.target) && !cuentaBtn.contains(e.target)) {
+                    cuentaMenu.classList.add('hidden');
+                }
+            });
+        }
+        // Cerrar sesión
         const cerrarSesionBtn = document.getElementById('cerrarSesion');
         if (cerrarSesionBtn) {
-            cerrarSesionBtn.addEventListener('click', async function(e) {
+            cerrarSesionBtn.addEventListener('click', async function (e) {
                 e.preventDefault();
                 const token = localStorage.getItem('token');
                 try {
@@ -83,7 +127,7 @@
                     const data = await res.json();
                     alert(data.message || JSON.stringify(data));
                     console.log(data);
-                } catch (err) {}
+                } catch (err) { }
                 localStorage.clear();
                 window.location.href = 'login.html';
             });
@@ -132,7 +176,7 @@
 
             // Listeners para aumentar/disminuir cantidad y eliminar producto
             carritoProductos.querySelectorAll('.disminuirCantidad').forEach(btn => {
-                btn.onclick = function(e) {
+                btn.onclick = function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
                     let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
@@ -145,7 +189,7 @@
                 };
             });
             carritoProductos.querySelectorAll('.aumentarCantidad').forEach(btn => {
-                btn.onclick = function(e) {
+                btn.onclick = function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
                     let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
@@ -156,7 +200,7 @@
                 };
             });
             carritoProductos.querySelectorAll('.cantidadProducto').forEach(input => {
-                input.onchange = function(e) {
+                input.onchange = function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
                     let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
@@ -169,7 +213,7 @@
                 };
             });
             carritoProductos.querySelectorAll('.eliminarProducto').forEach(btn => {
-                btn.onclick = function(e) {
+                btn.onclick = function (e) {
                     e.stopPropagation();
                     const idx = parseInt(this.dataset.idx);
                     let carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
@@ -181,7 +225,7 @@
             });
         }
 
-        carritoLink.addEventListener('click', function(e) {
+        carritoLink.addEventListener('click', function (e) {
             e.preventDefault();
             if (carritoMenu.classList.contains('hidden')) {
                 renderizarCarritoMenu();
@@ -191,13 +235,13 @@
             }
         });
         // Cerrar menú si se hace clic fuera
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (!carritoMenu.contains(e.target) && !carritoLink.contains(e.target)) {
                 carritoMenu.classList.add('hidden');
             }
         });
         // Confirmar pedido
-        confirmarPedidoBtn.addEventListener('click', function() {
+        confirmarPedidoBtn.addEventListener('click', function () {
             const direccion = direccionEnvio.value.trim();
             if (!direccion) {
                 direccionEnvio.classList.add('border-red-500');
@@ -211,9 +255,17 @@
             actualizarContadorCarrito();
             alert('¡Pedido confirmado!');
         });
+        document.getElementById('menuDirecciones')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.location.href = 'direcciones.html';
+        });
+        document.getElementById('menuPedidos')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            window.location.href = 'pedidos.html';
+        });
     </script>
     <main class="flex justify-center items-center py-8 mb-9">
-        <section >
+        <section>
             <div class="text-center">
                 <h2 class="text-6xl font-bold py-6">Catálogo de Productos</h2>
                 <p class="text-3xl text-gray-600 font-verdana">Explora nuestra seleccion de productos disponibles</p>
@@ -223,11 +275,11 @@
 
     <main>
         <div id="buscador" class="flex flex-col gap-8 items-center mb-8">
-            <input type="text" id="busqueda" placeholder="Buscar productos..." 
-            class="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 w-1/2">
+            <input type="text" id="busqueda" placeholder="Buscar productos..."
+                class="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 w-1/2">
 
             <div id="categorias" class="flex flex-wrap justify-center items-center">
-                
+
             </div>
         </div>
     </main>
