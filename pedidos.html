@@ -23,6 +23,7 @@
     const listaPedidos = document.getElementById('listaPedidos');
 
     async function cargarPedidos() {
+        const token = localStorage.getItem('token');
         listaPedidos.innerHTML = '<div class="text-gray-500">Cargando...</div>';
         try {
             const res = await fetch('http://127.0.0.1:8000/api/pedidos', {
@@ -31,32 +32,108 @@
             });
             if (!res.ok) throw new Error('Error al cargar pedidos');
             const pedidos = await res.json();
-            if (pedidos.length === 0) {
+            if (!Array.isArray(pedidos) || pedidos.length === 0) {
                 listaPedidos.innerHTML = '<div class="text-gray-500">No tienes pedidos realizados.</div>';
             } else {
                 listaPedidos.innerHTML = pedidos.map(p => `
                     <div class="border rounded p-4 bg-gray-50">
                         <div class="flex justify-between items-center mb-2">
                             <div class="font-semibold text-lg">Pedido #${p.id}</div>
-                            <div class="text-sm text-gray-600">${p.created_at ? new Date(p.created_at).toLocaleString() : ''}</div>
+                            <div class="text-sm text-gray-600">${p.fecha_pedido ? new Date(p.fecha_pedido).toLocaleString() : (p.created_at ? new Date(p.created_at).toLocaleString() : '')}</div>
                         </div>
                         <div class="mb-2 text-sm text-gray-700">Estado: <span class="font-medium">${p.estado || 'Pendiente'}</span></div>
-                        <div class="mb-2 text-sm text-gray-700">Dirección: <span class="font-medium">${p.direccion || ''}</span></div>
-                        <div class="mb-2 text-sm text-gray-700">Total: <span class="font-medium">$${p.total ? p.total.toFixed(2) : ''}</span></div>
+                        <div class="mb-2 text-sm text-gray-700 flex items-center gap-2">Dirección: <span class="font-medium">${p.direccion ? `${p.direccion.direccion}, ${p.direccion.ciudad}, ${p.direccion.provincia} (${p.direccion.telefono})` : ''}</span>
+                            <button class="editarDireccionBtn ml-2" data-pedido="${p.id}" title="Editar dirección">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600 hover:text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 13h3l8-8a2.828 2.828 0 10-4-4l-8 8v3h3z" /></svg>
+                            </button>
+                            <select class="selectDireccionPedido hidden ml-2" data-pedido="${p.id}"></select>
+                            <button class="guardarDireccionBtn hidden ml-2 bg-blue-500 text-white px-2 py-1 rounded text-xs" data-pedido="${p.id}">Guardar</button>
+                            <button class="cancelarDireccionBtn hidden ml-2 bg-gray-400 text-white px-2 py-1 rounded text-xs" data-pedido="${p.id}">Cancelar</button>
+                        </div>
+                        <div class="mb-2 text-sm text-gray-700">Total: <span class="font-medium">$${p.total ? Number(p.total).toFixed(2) : ''}</span></div>
                         <div class="mt-2">
                             <div class="font-bold text-sm mb-1">Productos:</div>
                             <ul class="list-disc ml-6">
-                                ${(p.productos || []).map(prod => `
-                                    <li>
-                                        ${prod.pivot && prod.pivot.cantidad ? `<span class='font-semibold'>x${prod.pivot.cantidad}</span> - ` : ''}
-                                        ${prod.titulo || prod.nombre || 'Producto'}
-                                        ${prod.pivot && prod.pivot.precio_unitario ? ` <span class='text-gray-500'>($${prod.pivot.precio_unitario})</span>` : ''}
+                                ${(Array.isArray(p.productos) ? p.productos : []).map(prod => `
+                                    <li class="mb-1 flex items-center gap-2">
+                                        <img src="${prod.imagen}" alt="${prod.titulo || prod.nombre || 'Producto'}" class="w-8 h-8 object-cover rounded mr-2 border" />
+                                        <span class="font-semibold">x${prod.pivot && prod.pivot.cantidad ? prod.pivot.cantidad : 1}</span> -
+                                        <span>${prod.titulo || prod.nombre || 'Producto'}</span>
+                                        <span class="text-gray-500">($${prod.pivot && prod.pivot.precio_unitario ? Number(prod.pivot.precio_unitario).toFixed(2) : (prod.precio ? Number(prod.precio).toFixed(2) : '')})</span>
                                     </li>
                                 `).join('')}
                             </ul>
                         </div>
                     </div>
                 `).join('');
+                // Listeners para editar dirección con select
+                document.querySelectorAll('.editarDireccionBtn').forEach(btn => {
+                    btn.onclick = async function() {
+                        const pedidoId = this.dataset.pedido;
+                        // Ocultar botón editar y mostrar select y botones guardar/cancelar
+                        this.classList.add('hidden');
+                        const select = document.querySelector(`.selectDireccionPedido[data-pedido='${pedidoId}']`);
+                        const guardarBtn = document.querySelector(`.guardarDireccionBtn[data-pedido='${pedidoId}']`);
+                        const cancelarBtn = document.querySelector(`.cancelarDireccionBtn[data-pedido='${pedidoId}']`);
+                        select.classList.remove('hidden');
+                        guardarBtn.classList.remove('hidden');
+                        cancelarBtn.classList.remove('hidden');
+                        // Cargar direcciones del usuario
+                        const token = localStorage.getItem('token');
+                        select.innerHTML = '<option value="">Cargando...</option>';
+                        try {
+                            const res = await fetch('http://127.0.0.1:8000/api/direcciones', {
+                                method: 'GET',
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!res.ok) throw new Error('Error al cargar direcciones');
+                            const direcciones = await res.json();
+                            select.innerHTML = '<option value="">Selecciona una dirección</option>' +
+                                direcciones.map(d => `<option value="${d.id}">${d.direccion ? d.direccion : ''}${d.ciudad ? ', ' + d.ciudad : ''}${d.provincia ? ', ' + d.provincia : ''}${d.telefono ? ' (' + d.telefono + ')' : ''}</option>`).join('');
+                        } catch (e) {
+                            select.innerHTML = '<option value="">Error al cargar direcciones</option>';
+                        }
+                    };
+                });
+                document.querySelectorAll('.guardarDireccionBtn').forEach(btn => {
+                    btn.onclick = async function() {
+                        const pedidoId = this.dataset.pedido;
+                        const select = document.querySelector(`.selectDireccionPedido[data-pedido='${pedidoId}']`);
+                        const nuevaDireccionId = select.value;
+                        if (!nuevaDireccionId) return alert('Selecciona una dirección');
+                        const token = localStorage.getItem('token');
+                        try {
+                            const res = await fetch(`http://127.0.0.1:8000/api/pedidos/direccion/${pedidoId}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                    direccion_id: parseInt(nuevaDireccionId)
+                                })
+                            });
+                            if (res.ok) {
+                                alert('Dirección actualizada');
+                                cargarPedidos();
+                            } else {
+                                const data = await res.json();
+                                alert(data.message || 'No se pudo actualizar la dirección');
+                            }
+                        } catch (err) {
+                            alert('Error al actualizar la dirección');
+                        }
+                    };
+                });
+                document.querySelectorAll('.cancelarDireccionBtn').forEach(btn => {
+                    btn.onclick = function() {
+                        const pedidoId = this.dataset.pedido;
+                        document.querySelector(`.editarDireccionBtn[data-pedido='${pedidoId}']`).classList.remove('hidden');
+                        document.querySelector(`.selectDireccionPedido[data-pedido='${pedidoId}']`).classList.add('hidden');
+                        document.querySelector(`.guardarDireccionBtn[data-pedido='${pedidoId}']`).classList.add('hidden');
+                        document.querySelector(`.cancelarDireccionBtn[data-pedido='${pedidoId}']`).classList.add('hidden');
+                    };
+                });
             }
         } catch (err) {
             listaPedidos.innerHTML = '<div class="text-red-500">No se pudieron cargar los pedidos.</div>';

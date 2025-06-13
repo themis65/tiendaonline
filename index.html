@@ -155,8 +155,14 @@
         }
         // Carrito: actualizar contador
         function actualizarContadorCarrito() {
-            const carrito = localStorage.getItem('carrito_backend') ? JSON.parse(localStorage.getItem('carrito_backend')).productos : [];
-            const total = carrito.reduce((acc, p) => acc + (p.cantidad || 1), 0);
+            const carritoData = localStorage.getItem('carrito_backend');
+            const carrito = carritoData ? JSON.parse(carritoData) : null;
+            const productos = carrito && Array.isArray(carrito.productos) ? carrito.productos : [];
+            // Sumar todas las cantidades desde pivot.cantidad
+            const total = productos.reduce((acc, producto) => {
+                const cantidad = producto.pivot && producto.pivot.cantidad ? parseInt(producto.pivot.cantidad) : 0;
+                return acc + cantidad;
+            }, 0);
             const contador = document.getElementById('carritoContador');
             if (contador) {
                 contador.textContent = total;
@@ -353,18 +359,21 @@
                 return;
             }
             direccionEnvio.classList.remove('border-red-500');
-            // Preparar datos del pedido
-            const carrito = JSON.parse(localStorage.getItem('carrito') || '[]');
-            if (carrito.length === 0) {
+            // Usar productos del backend
+            const carritoData = localStorage.getItem('carrito_backend');
+            const carrito = carritoData ? JSON.parse(carritoData) : null;
+            const productos = carrito && Array.isArray(carrito.productos) ? carrito.productos : [];
+            if (productos.length === 0) {
                 alert('El carrito está vacío.');
                 return;
             }
-            const productos = carrito.map(p => ({
-                producto_id: p.id,
-                cantidad: p.cantidad,
-                precio_unitario: p.precio
+            // Construir array de productos para el backend
+            const productosPedido = productos.map(p => ({
+                producto_id: p.pivot && p.pivot.producto_id ? p.pivot.producto_id : p.id,
+                cantidad: p.pivot && p.pivot.cantidad ? p.pivot.cantidad : (p.cantidad || 1),
+                precio_unitario: p.pivot && p.pivot.precio_unitario ? p.pivot.precio_unitario : p.precio
             }));
-            const total = carrito.reduce((acc, p) => acc + (p.precio * p.cantidad), 0);
+            const total = productosPedido.reduce((acc, p) => acc + (p.precio_unitario * p.cantidad), 0);
             const token = localStorage.getItem('token');
             try {
                 const res = await fetch('http://127.0.0.1:8000/api/pedidos', {
@@ -376,14 +385,16 @@
                     body: JSON.stringify({
                         direccion_id: parseInt(direccion),
                         total: total,
-                        productos: productos
+                        productos: productosPedido
                     })
                 });
                 if (res.ok) {
                     carritoMenu.classList.add('hidden');
-                    localStorage.removeItem('carrito');
+                    localStorage.removeItem('carrito_backend');
+                    localStorage.removeItem('carrito_id');
                     actualizarContadorCarrito();
                     alert('¡Pedido confirmado!');
+                    await sincronizarCarritoDesdeBackend();
                 } else {
                     const data = await res.json();
                     alert(data.message || 'No se pudo confirmar el pedido');
@@ -392,14 +403,17 @@
                 alert('Error al enviar el pedido');
             }
         });
+
         document.getElementById('menuDirecciones')?.addEventListener('click', function (e) {
             e.preventDefault();
             window.location.href = 'direcciones.html';
         });
+
         document.getElementById('menuPedidos')?.addEventListener('click', function (e) {
             e.preventDefault();
             window.location.href = 'pedidos.html';
         });
+        
         // Sincronizar carrito local con backend al iniciar sesión y mostrarlo en el front
         async function sincronizarCarritoDesdeBackend() {
             const token = localStorage.getItem('token');
