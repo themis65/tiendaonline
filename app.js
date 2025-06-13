@@ -181,6 +181,7 @@ function mostrarProductos(productos) {
             productoDiv.innerHTML = `
                 <img src="${producto.imagen}" alt="${producto.titulo}" class="w-32 h-32 object-contain m-4">
                 <h2 class="text-lg font-bold mb-2">${producto.titulo}</h2>
+                <div class="text-xs text-gray-500 mb-2">Stock: ${typeof producto.stock !== 'undefined' ? producto.stock : 'N/D'}</div>
                 <p class="text-gray-700 mb-2">$${producto.precio}</p>
                 <a href="detalles.html?id=${producto.id}" class="mb-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300">Detalles</a>
                 <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">Agregar al carrito</button>

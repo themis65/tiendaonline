@@ -55,8 +55,7 @@
                 </li>
                 <li id="adminNav" style="display:none">
                     <a href="crud.html"
-                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Administrar
-                        Productos</a>
+                        class="bg-gray-300 text-gray-900 px-4 py-2 rounded hover:bg-blue-600 transition-colors hover:text-white">Administrar</a>
                 </li>
                 <li id="loginNav">
                     <a href="login.html"
@@ -226,17 +225,23 @@
                 carritoProductos.innerHTML = '<p class="text-gray-500 text-center">El carrito está vacío.</p>';
                 return;
             }
-            carritoProductos.innerHTML = carrito.map((p, idx) => `
-                <div class="flex items-center justify-between border-b py-2">
-                    <span class="font-medium">${p.nombre || p.titulo || 'Producto'}</span>
+            carritoProductos.innerHTML = carrito.map((p, idx) => {
+                let stock = (typeof p.stock !== 'undefined') ? p.stock : (p.pivot && typeof p.pivot.stock !== 'undefined' ? p.pivot.stock : 'N/D');
+                return (
+                `<div class="flex items-center justify-between border-b py-2">
+                    <div>
+                        <span class="font-medium">${p.nombre || p.titulo || 'Producto'}</span>
+                        <div class="text-xs text-gray-500">Stock: ${stock}</div>
+                    </div>
                     <div class="flex items-center gap-2">
                         <button class="disminuirCantidad bg-gray-200 px-2 rounded text-lg font-bold" data-idx="${idx}">-</button>
                         <span class="cantidadProducto w-12 text-center border rounded bg-gray-100 select-none" data-idx="${idx}">${p.cantidad || 1}</span>
                         <button class="aumentarCantidad bg-gray-200 px-2 rounded text-lg font-bold" data-idx="${idx}">+</button>
                         <button class="eliminarProducto bg-red-500 text-white px-2 rounded text-lg font-bold" title="Eliminar" data-idx="${idx}">&times;</button>
                     </div>
-                </div>
-            `).join('');
+                </div>`
+                );
+            }).join('');
 
             // Listeners para aumentar/disminuir cantidad y eliminar producto
             carritoProductos.querySelectorAll('.disminuirCantidad').forEach(btn => {
@@ -395,6 +400,7 @@
                     actualizarContadorCarrito();
                     alert('¡Pedido confirmado!');
                     await sincronizarCarritoDesdeBackend();
+                    cargarProductos(); // Volver a cargar productos para actualizar el catálogo
                 } else {
                     const data = await res.json();
                     alert(data.message || 'No se pudo confirmar el pedido');

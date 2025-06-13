@@ -20,6 +20,10 @@
     if (!token) {
         window.location.href = 'login.html';
     }
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user && user.rol === 'admin') {
+        window.location.href = 'pedidos_admin.html';
+    }
     const listaPedidos = document.getElementById('listaPedidos');
 
     async function cargarPedidos() {
