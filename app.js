@@ -68,8 +68,7 @@ async function cargarCategorias() {
 }
 
 // --- POPUP DE CANTIDAD ---
-function mostrarPopupCantidad(producto) {
-    // Verifica si está logueado antes de mostrar el popup de cantidad
+async function mostrarPopupCantidad(producto) {
     const token = localStorage.getItem('token');
     if (!token) {
         mostrarMensajeFlotanteLogin();
@@ -78,17 +77,47 @@ function mostrarPopupCantidad(producto) {
         }, 1000);
         return;
     }
-
+    // Obtener stock actualizado del backend
+    let productoActual = producto;
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/productos/${producto.id}`);
+        if (res.ok) {
+            productoActual = await res.json();
+        }
+    } catch {}
+    // El stock puede venir como string, asegúrate de convertirlo a número
+    let stockDisponible = 0;
+    if (typeof productoActual.stock === 'number') {
+        stockDisponible = productoActual.stock;
+    } else if (typeof productoActual.stock === 'string') {
+        stockDisponible = parseInt(productoActual.stock, 10);
+    }
+    // Obtener cantidad ya en carrito
+    let carrito = JSON.parse(localStorage.getItem('carrito_backend') || '{}');
+    let cantidadEnCarrito = 0;
+    if (carrito && Array.isArray(carrito.productos)) {
+        const item = carrito.productos.find(p => p.producto && String(p.producto.id) === String(producto.id));
+        if (item) cantidadEnCarrito = item.cantidad;
+    }
+    const maxCantidad = Math.max(stockDisponible - cantidadEnCarrito, 0);
+    if (maxCantidad <= 0) {
+        const popup = document.createElement('div');
+        popup.className = 'fixed top-8 right-8 bg-red-600 text-white px-6 py-3 rounded shadow-lg z-50';
+        popup.textContent = 'No hay suficiente stock disponible.';
+        document.body.appendChild(popup);
+        setTimeout(() => popup.remove(), 2000);
+        return;
+    }
     const popupExistente = document.getElementById('popupCantidad');
     if (popupExistente) popupExistente.remove();
-
     const fondo = document.createElement('div');
     fondo.id = 'popupCantidad';
     fondo.className = 'fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50';
     fondo.innerHTML = `
         <div class="bg-white rounded-lg shadow-lg p-8 flex flex-col items-center w-80">
             <h3 class="text-xl font-bold mb-4">¿Cuántas unidades deseas agregar?</h3>
-            <input type="number" id="inputCantidadPopup" min="1" value="1" class="border rounded px-3 py-2 w-24 text-center mb-4" />
+            <input type="number" id="inputCantidadPopup" min="1" max="${maxCantidad}" value="1" class="border rounded px-3 py-2 w-24 text-center mb-4" />
+            <div class="text-xs text-gray-500 mb-2">Stock disponible: ${maxCantidad}</div>
             <div class="flex gap-4">
                 <button id="btnAgregarPopup" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">Agregar</button>
                 <button id="btnCancelarPopup" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">Cancelar</button>
@@ -99,10 +128,12 @@ function mostrarPopupCantidad(producto) {
     document.getElementById('inputCantidadPopup').focus();
     document.getElementById('btnAgregarPopup').onclick = async () => {
         let cantidad = parseInt(document.getElementById('inputCantidadPopup').value);
-        const carrito_id = localStorage.getItem('carrito_id');
-        const token = localStorage.getItem('token');
-        // Usar el producto recibido por la función mostrarPopupCantidad
         if (isNaN(cantidad) || cantidad < 1) cantidad = 1;
+        if (cantidad > maxCantidad) {
+            alert('No puedes agregar más de la cantidad disponible en stock.');
+            return;
+        }
+        const carrito_id = localStorage.getItem('carrito_id');
         try {
             const res = await fetch(`http://127.0.0.1:8000/api/carrito`, {
                 method: 'POST',
@@ -129,11 +160,9 @@ function mostrarPopupCantidad(producto) {
         fondo.remove();
     };
     document.getElementById('btnCancelarPopup').onclick = () => fondo.remove();
-    // Cerrar con Escape
     fondo.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') fondo.remove();
     });
-    // Permitir Enter para agregar
     document.getElementById('inputCantidadPopup').addEventListener('keydown', function (e) {
         if (e.key === 'Enter') document.getElementById('btnAgregarPopup').click();
     });
@@ -169,6 +198,12 @@ function mostrarMensajeFlotanteLogin() {
 
 function mostrarProductos(productos) {
     contenedorProductos.innerHTML = "";
+    // Detectar usuario admin de forma robusta
+    let user = {};
+    try {
+        user = JSON.parse(localStorage.getItem('user') || '{}');
+    } catch {}
+    const esAdmin = user && user.rol === 'admin';
     if (productos.length === 0) {
         contenedorProductos.innerHTML =
             "<p class='text-2xl font-bold text-center text-gray-800 col-span-full m-4'>No se encontraron productos.</p>";
@@ -177,18 +212,19 @@ function mostrarProductos(productos) {
             const productoDiv = document.createElement("div");
             productoDiv.className =
                 "bg-white rounded-lg shadow-md p-4 flex flex-col items-center hover:shadow-lg transition-shadow duration-300";
-
             productoDiv.innerHTML = `
                 <img src="${producto.imagen}" alt="${producto.titulo}" class="w-32 h-32 object-contain m-4">
                 <h2 class="text-lg font-bold mb-2">${producto.titulo}</h2>
                 <div class="text-xs text-gray-500 mb-2">Stock: ${typeof producto.stock !== 'undefined' ? producto.stock : 'N/D'}</div>
                 <p class="text-gray-700 mb-2">$${producto.precio}</p>
                 <a href="detalles.html?id=${producto.id}" class="mb-2 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-300">Detalles</a>
-                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">Agregar al carrito</button>
+                ${!esAdmin ? '<button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-300">Agregar al carrito</button>' : ''}
             `;
-            // Botón agregar al carrito
-            const btnCarrito = productoDiv.querySelector('button');
-            btnCarrito.onclick = () => mostrarPopupCantidad(producto);
+            // Botón agregar al carrito solo para no admin
+            if (!esAdmin) {
+                const btnCarrito = productoDiv.querySelector('button');
+                if (btnCarrito) btnCarrito.onclick = () => mostrarPopupCantidad(producto);
+            }
             contenedorProductos.appendChild(productoDiv);
         });
     }

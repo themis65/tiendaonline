@@ -286,6 +286,14 @@
                     const token = localStorage.getItem('token');
                     const carrito_id = localStorage.getItem('carrito_id');
                     if (!producto || !token || !carrito_id) return;
+                    // Validar stock antes de aumentar
+                    let stock = (typeof producto.stock !== 'undefined') ? producto.stock : (producto.pivot && typeof producto.pivot.stock !== 'undefined' ? producto.pivot.stock : null);
+                    if (typeof stock === 'string') stock = parseInt(stock, 10);
+                    const cantidadActual = parseInt(producto.cantidad);
+                    if (stock !== null && cantidadActual >= stock) {
+                        alert('No puedes agregar más de la cantidad disponible en stock.');
+                        return;
+                    }
                     try {
                         const res = await fetch(`http://127.0.0.1:8000/api/carrito/${producto.id}`, {
                             method: 'PUT',
@@ -473,7 +481,7 @@
         </div>
     </main>
 
-    <main>
+    <main class="mx-auto p-4 rounded">
         <div id="productos" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 ld:grid-cols-4 gap-4"></div>
     </main>
 
